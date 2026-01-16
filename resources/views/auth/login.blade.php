@@ -16,7 +16,7 @@
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden">
         <div class="px-8 py-8 md:px-10">
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">REVENT</h1>
+                <h1 class="text-2xl font-bold text-blue-600">REVENT</h1>
                 <p class="text-gray-500 text-sm mt-1">Silakan login untuk melanjutkan</p>
             </div>
 
@@ -42,7 +42,7 @@
                     </div>
 
                     <button type="submit" 
-                        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200">
+                        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg">
                         Masuk
                     </button>
                 </div>
@@ -52,14 +52,6 @@
                 <p class="text-xs text-gray-400">
                     &copy; {{ date('Y') }} Revent CENTECHNO
                 </p>
-            </div>
-        </div>
-        <div class="bg-slate-50 px-8 py-4 border-t border-slate-100">
-            <div class="flex items-center justify-center gap-2 text-xs text-gray-500">
-                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Gunakan akun default Admin / Kasir</span>
             </div>
         </div>
     </div>
