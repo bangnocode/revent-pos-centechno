@@ -93,8 +93,9 @@ createApp({
                 return new Intl.NumberFormat('id-ID').format(num);
             },
 
-            formatUangDibayar: () => {
-                let value = pembayaran.value.uang_dibayar.toString().replace(/[^\d]/g, '');
+            formatUangDibayar: (e) => {
+                // Extract only numbers from input
+                let value = e.target.value.replace(/[^\d]/g, '');
                 pembayaran.value.uang_dibayar = value ? parseInt(value) : 0;
             }
         };
@@ -110,17 +111,26 @@ createApp({
 
             setDiskonItem: (index, value) => {
                 const item = state.cart.value[index];
-                const diskon = Math.max(0, parseFloat(value) || 0);
+                // Parse value and ensure it is a valid non-negative integer
+                let diskon = Math.max(0, parseInt(value) || 0);
                 const maxDiskon = item.harga_satuan * item.jumlah;
 
-                // Limit diskon tidak lebih dari harga item
-                item.diskon_item = Math.min(diskon, maxDiskon);
+                // Limit diskon tidak lebih dari harga total item (harga * qty)
+                if (diskon > maxDiskon) {
+                    diskon = maxDiskon;
+                }
+
+                item.diskon_item = diskon;
                 core.updateSubtotal(index);
             },
 
             setDiskonTransaksi: (value) => {
-                const diskon = Math.max(0, parseFloat(value) || 0);
+                // Parse numeric value, removing formatting dots
+                let numericValue = value.toString().replace(/[^\d]/g, '');
+                let diskon = Math.max(0, parseInt(numericValue) || 0);
                 const maxDiskon = computedValues.subtotalSetelahDiskonItem.value;
+
+                // Limit diskon transaksi tidak lebih dari subtotal setelah diskon item
                 state.diskonTransaksi.value = Math.min(diskon, maxDiskon);
             },
 
@@ -162,10 +172,22 @@ createApp({
                         );
 
                         if (existingIndex >= 0) {
-                            state.cart.value[existingIndex].jumlah =
-                                parseFloat(state.cart.value[existingIndex].jumlah) + 1;
+                            const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
+                            if (newTotal > barang.stok_sekarang) {
+                                alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
+                                state.barcode.value = '';
+                                core.focusBarcode();
+                                return;
+                            }
+                            state.cart.value[existingIndex].jumlah = newTotal;
                             core.updateSubtotal(existingIndex);
                         } else {
+                            if (barang.stok_sekarang < 1) {
+                                alert(`Stok ${barang.nama_barang} habis!`);
+                                state.barcode.value = '';
+                                core.focusBarcode();
+                                return;
+                            }
                             state.cart.value.push({
                                 kode_barang: barang.kode_barang,
                                 barcode: barang.barcode,
@@ -173,6 +195,7 @@ createApp({
                                 harga_satuan: parseFloat(barang.harga_jual_normal),
                                 jumlah: 1,
                                 satuan: barang.satuan,
+                                stok_sekarang: barang.stok_sekarang,
                                 subtotal: parseFloat(barang.harga_jual_normal)
                             });
                         }
@@ -241,10 +264,18 @@ createApp({
                 );
 
                 if (existingIndex >= 0) {
-                    state.cart.value[existingIndex].jumlah =
-                        parseFloat(state.cart.value[existingIndex].jumlah) + 1;
+                    const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
+                    if (newTotal > barang.stok_sekarang) {
+                        alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
+                        return;
+                    }
+                    state.cart.value[existingIndex].jumlah = newTotal;
                     core.updateSubtotal(existingIndex);
                 } else {
+                    if (barang.stok_sekarang < 1) {
+                        alert(`Stok ${barang.nama_barang} habis!`);
+                        return;
+                    }
                     state.cart.value.push({
                         kode_barang: barang.kode_barang,
                         barcode: barang.barcode,
@@ -252,6 +283,7 @@ createApp({
                         harga_satuan: parseFloat(barang.harga_jual_normal),
                         jumlah: 1,
                         satuan: barang.satuan,
+                        stok_sekarang: barang.stok_sekarang,
                         subtotal: parseFloat(barang.harga_jual_normal)
                     });
                 }
@@ -316,7 +348,12 @@ createApp({
         // Cart Management
         const cart = {
             tambahQty: (index) => {
-                state.cart.value[index].jumlah = parseFloat(state.cart.value[index].jumlah) + 1;
+                const item = state.cart.value[index];
+                if (parseFloat(item.jumlah) + 1 > item.stok_sekarang) {
+                    alert(`Stok tidak cukup! (Tersedia: ${item.stok_sekarang})`);
+                    return;
+                }
+                item.jumlah = parseFloat(item.jumlah) + 1;
                 core.updateSubtotal(index);
             },
 
@@ -359,14 +396,19 @@ createApp({
 
             applyEditQty: () => {
                 if (state.editSelectedIndex.value >= 0 && state.tempQty.value > 0) {
-                    state.cart.value[state.editSelectedIndex.value].jumlah = parseFloat(state
-                        .tempQty.value);
+                    const item = state.cart.value[state.editSelectedIndex.value];
+                    const newQty = parseFloat(state.tempQty.value);
+
+                    if (newQty > item.stok_sekarang) {
+                        // Let UI handle the error state but block application here too
+                        return;
+                    }
+
+                    item.jumlah = newQty;
                     core.updateSubtotal(state.editSelectedIndex.value);
-                }
-                state.editQtyMode.value = false;
-                if (state.editMode.value) {
-                    // Jangan reset editSelectedIndex, biarkan tetap pada item yang diedit
-                    // editSelectedIndex.value = -1; // JANGAN DILAKUKAN
+                    state.editQtyMode.value = false;
+                } else if (state.tempQty.value <= 0) {
+                    state.editQtyMode.value = false;
                 }
             },
 
@@ -704,7 +746,9 @@ createApp({
             manualInput: core.manualInput,
             cariBarangManual: core.cariBarangManual,
             tambahBarangDariPencarian: core.tambahBarangDariPencarian,
-            tutupModalCari: core.tutupModalCari
+            tutupModalCari: core.tutupModalCari,
+            setDiskonItem: core.setDiskonItem,
+            setDiskonTransaksi: core.setDiskonTransaksi,
         };
     }
 }).mount('#app');

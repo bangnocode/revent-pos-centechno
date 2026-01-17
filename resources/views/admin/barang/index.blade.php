@@ -63,7 +63,7 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $item->stok_sekarang > 10 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            {{ $item->stok_sekarang }} {{ $item->satuan }}
+                            {{ number_format($item->stok_sekarang, 0, ',', '.') }} {{ $item->satuan }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right font-medium text-gray-900">

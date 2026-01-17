@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('restrict');
             $table->decimal('total_harga', 15, 2);
             $table->enum('status', ['draft', 'selesai', 'dibatalkan'])->default('draft');
+            $table->enum('metode_pembayaran', ['tunai', 'hutang', 'transfer']);
             $table->text('keterangan')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users'); // Operator who created it
             $table->timestamps();

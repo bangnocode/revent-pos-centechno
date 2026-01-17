@@ -12,6 +12,7 @@ class Pembelian extends Model
         'supplier_id',
         'total_harga',
         'status',
+        'metode_pembayaran',
         'keterangan',
         'user_id',
     ];

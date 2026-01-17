@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -310,14 +308,14 @@
                                                     class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                                                     <span class="text-gray-500 text-xs">Rp</span>
                                                 </div>
-                                                <input v-model.number="item.diskon_item" type="number"
+                                                <input :value="item.diskon_item" type="number"
                                                     min="0" step="100"
                                                     @input="setDiskonItem(index, $event.target.value)"
                                                     :max="item.harga_satuan * item.jumlah"
                                                     class="w-24 pl-6 pr-2 py-1 border border-gray-300 rounded text-xs text-right">
                                             </div>
                                             <p class="text-xs text-gray-400 mt-0.5">
-                                                Maks: Rp @{{ formatRupiah(item.harga_satuan * item.jumlah) }}
+                                                Maks: Rp @{{ formatRupiah   (item.harga_satuan * item.jumlah) }}
                                             </p>
                                         </td>
                                         <td class="px-3 py-2 text-xs font-bold text-gray-900">
@@ -491,10 +489,16 @@
                 <!-- Content -->
                 <div class="p-4">
                     <!-- Info Barang -->
-                    <div class="mb-4 p-2.5 bg-gray-50 rounded border border-gray-200">
-                        <div class="text-xs text-gray-500 mb-0.5">Barang</div>
-                        <div class="font-semibold text-gray-900 text-sm">@{{ selectedItem?.nama_barang }}</div>
-                        <div class="text-xs text-gray-500 mt-0.5">@{{ selectedItem?.kode_barang }}</div>
+                    <div class="mb-4 p-2.5 bg-gray-50 rounded border border-gray-200 flex justify-between items-start">
+                        <div>
+                            <div class="text-xs text-gray-500 mb-0.5">Barang</div>
+                            <div class="font-semibold text-gray-900 text-sm">@{{ selectedItem?.nama_barang }}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">@{{ selectedItem?.kode_barang }}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-0.5">Stok Tersedia</div>
+                            <div class="font-bold text-blue-600 text-sm">@{{ selectedItem?.stok_sekarang }} @{{ selectedItem?.satuan }}</div>
+                        </div>
                     </div>
 
                     <!-- Input Quantity Section -->
@@ -505,8 +509,9 @@
                                 class="w-8 h-8 bg-red-100 text-red-600 rounded hover:bg-red-200 font-semibold transition-colors">
                                 −
                             </button>
-                            <input v-model.number="tempQty" @keydown.enter="applyEditQty" @keydown.esc="batalEditQty"
+                            <input v-model.number="tempQty" @keydown.enter="tempQty <= selectedItem?.stok_sekarang && applyEditQty()" @keydown.esc="batalEditQty"
                                 type="number" min="1"
+                                :class="{'border-red-500 focus:ring-red-500': tempQty > selectedItem?.stok_sekarang}"
                                 class="flex-1 px-3 py-1.5 border border-gray-300 rounded text-center text-base font-semibold focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
                                 placeholder="Enter untuk simpan, ESC untuk batal" ref="qtyModalInput" autofocus>
                             <button @click="tempQty++"
@@ -514,7 +519,16 @@
                                 +
                             </button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1.5 hidden lg:flex gap-">
+
+                        <!-- Teks Error -->
+                        <div v-if="tempQty > selectedItem?.stok_sekarang" class="mt-2 text-red-600 text-[11px] font-bold animate-pulse flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Jumlah melebihi stok yang tersedia!
+                        </div>
+
+                        <p class="text-xs text-gray-500 mt-1.5 hidden lg:flex gap-1">
                             <kbd class="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Enter</kbd>
                             Simpan •
                             <kbd class="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Esc</kbd>
@@ -529,6 +543,8 @@
                             Batal <span class="hidden lg:flex">(ESC)</span>
                         </button>
                         <button @click="applyEditQty"
+                            :disabled="tempQty > selectedItem?.stok_sekarang || tempQty <= 0"
+                            :class="{'opacity-50 cursor-not-allowed': tempQty > selectedItem?.stok_sekarang || tempQty <= 0}"
                             class="flex-1 flex justify-center px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs font-medium transition-colors">
                             Simpan <span class="hidden lg:flex">(Enter)</span>
                         </button>
@@ -583,10 +599,10 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500">Rp</span>
                             </div>
-                            <input v-model.number="diskonTransaksi" type="number" min="0" step="100"
-                                @input="setDiskonTransaksi($event.target.value)"
+                            <input :value="formatRupiah(diskonTransaksi)" type="text"
+                                @input="setDiskonTransaksi($event.target.value)" maxlength="12"
                                 class="w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded text-right"
-                                placeholder="0" :disabled="isProcessing" :max="subtotalSetelahDiskonItem">
+                                placeholder="0" :disabled="isProcessing" inputmode="numeric">
                         </div>
                         <p class="text-xs text-gray-500 mt-1">
                             Maks: Rp @{{ formatRupiah(subtotalSetelahDiskonItem) }}
@@ -605,10 +621,10 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1 flex gap-1">Uang Dibayar <span class="hidden lg:flex">(Enter untuk
                             proses)</span></label>
-                        <input v-model.number="pembayaran.uang_dibayar" @input="formatUangDibayar"
-                            @keydown.enter.prevent="!isProcessing && prosesPembayaran()" type="text"
+                        <input :value="formatRupiah(pembayaran.uang_dibayar)" @input="formatUangDibayar"
+                            @keydown.enter.prevent="!isProcessing && prosesPembayaran()" type="text" maxlength="12"
                             class="w-full px-3 py-2 border border-gray-300 rounded text-right text-lg font-semibold focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none"
-                            placeholder="0" :disabled="isProcessing" ref="uangDibayarInput" />
+                            placeholder="0" :disabled="isProcessing" ref="uangDibayarInput" inputmode="numeric" />
                         <p class="text-xs text-gray-500 mt-0.5 hidden lg:flex gap-1 items-center">
                             <kbd class="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Enter</kbd>
                             Proses pembayaran •
@@ -828,4 +844,3 @@
     <script src="{{ asset('js/pos-logic.js') }}"></script>
 </body>
 
-</html>

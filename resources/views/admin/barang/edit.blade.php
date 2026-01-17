@@ -80,8 +80,8 @@
                     <label class="block text-sm font-medium text-gray-700">Harga Beli Terakhir <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <span class="absolute left-3 top-2 text-gray-500">Rp</span>
-                        <input type="number" name="harga_beli_terakhir" value="{{ old('harga_beli_terakhir', $barang->harga_beli_terakhir) }}"
-                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" required>
+                        <input type="text" name="harga_beli_terakhir" value="{{ old('harga_beli_terakhir', (int)$barang->harga_beli_terakhir) }}"
+                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mask-ribuan" inputmode="numeric" required>
                     </div>
                 </div>
 
@@ -90,16 +90,16 @@
                     <label class="block text-sm font-medium text-gray-700">Harga Jual Normal <span class="text-red-500">*</span></label>
                     <div class="relative">
                          <span class="absolute left-3 top-2 text-gray-500">Rp</span>
-                        <input type="number" name="harga_jual_normal" value="{{ old('harga_jual_normal', $barang->harga_jual_normal) }}"
-                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" required>
+                        <input type="text" name="harga_jual_normal" value="{{ old('harga_jual_normal', (int)$barang->harga_jual_normal) }}"
+                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mask-ribuan" inputmode="numeric" required>
                     </div>
                 </div>
 
                 <!-- Stok -->
                  <div class="space-y-1">
                     <label class="block text-sm font-medium text-gray-700">Stok Sekarang <span class="text-red-500">*</span></label>
-                    <input type="number" name="stok_sekarang" value="{{ old('stok_sekarang', $barang->stok_sekarang) }}"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" required>
+                    <input type="text" name="stok_sekarang" value="{{ old('stok_sekarang', (int)$barang->stok_sekarang) }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mask-ribuan" inputmode="numeric" required>
                 </div>
             </div>
         </div>

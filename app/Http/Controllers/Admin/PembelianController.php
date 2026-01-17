@@ -19,13 +19,34 @@ class PembelianController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pembelians = Pembelian::with(['supplier', 'user'])
+        $startDate = $request->input('start_date', date('Y-m-d'));
+        $endDate = $request->input('end_date', date('Y-m-d'));
+        $search = $request->input('search');
+
+        $query = Pembelian::query();
+
+        // Filter by Date
+        if ($startDate && $endDate) {
+            $query->whereBetween('tanggal', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        // Search by Invoice or Customer
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_faktur', 'like', "%{$search}%")
+                    ->orWhereHas('details', function ($q) use ($search) {
+                        $q->where('kode_barang', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $pembelians = $query->with(['supplier', 'user', 'details'])
             ->orderBy('tanggal', 'desc')
             ->paginate(10);
 
-        return view('admin.pembelian.index', compact('pembelians'));
+        return view('admin.pembelian.index', compact('pembelians', 'startDate', 'endDate', 'search'));
     }
 
     /**
@@ -50,6 +71,7 @@ class PembelianController extends Controller
     {
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
+            'metode_pembayaran' => 'required',
             'tanggal' => 'required|date',
             'nomor_faktur' => 'required|unique:pembelians,nomor_faktur',
             'items' => 'required|array|min:1',
@@ -67,6 +89,7 @@ class PembelianController extends Controller
                     'supplier_id' => $request->supplier_id,
                     'total_harga' => collect($request->items)->sum(fn($item) => $item['jumlah'] * $item['harga_beli']),
                     'status' => 'selesai', // Directly finished for now
+                    'metode_pembayaran' => $request->metode_pembayaran,
                     'keterangan' => $request->keterangan,
                     'user_id' => auth()->id(),
                 ]);

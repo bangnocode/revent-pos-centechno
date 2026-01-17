@@ -25,7 +25,8 @@ class TransaksiController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nomor_faktur', 'like', "%{$search}%")
-                  ->orWhere('nama_pelanggan', 'like', "%{$search}%");
+                  ->orWhere('nama_pelanggan', 'like', "%{$search}%")
+                  ->orWhere('id_operator', 'like', "%{$search}%");
             });
         }
 

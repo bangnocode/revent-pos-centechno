@@ -37,6 +37,15 @@
                             </select>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran <span class="text-red-500">*</span></label>
+                            <select x-model="form.metode_pembayaran" required
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm">
+                                <option value="tunai">Tunai</option>
+                                <option value="hutang">Hutang</option>
+                                <option value="transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
                             <textarea x-model="form.keterangan" rows="2"
                                 class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm"></textarea>
@@ -82,6 +91,7 @@
                                 <th class="px-4 py-3 rounded-l-lg">Barang</th>
                                 <th class="px-4 py-3 w-24 text-center">Qty</th>
                                 <th class="px-4 py-3 w-32 text-right">Harga Beli</th>
+                                <th class="px-4 py-3 w-32 text-right">Harga Jual</th>
                                 <th class="px-4 py-3 w-32 text-right">Subtotal</th>
                                 <th class="px-4 py-3 w-10 text-center rounded-r-lg"></th>
                             </tr>
@@ -94,14 +104,17 @@
                                         <div class="text-xs text-slate-500" x-text="item.kode_barang"></div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="number" x-model.number="item.jumlah" min="1" 
-                                            class="w-full px-2 py-1 border border-gray-200 rounded text-center focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm">
+                                        <input type="text" x-model="item.jumlah" @input="item.jumlah = formatNumberRibuan($event.target.value)"
+                                            class="w-full px-2 py-1 border border-gray-200 rounded text-center focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="number" x-model.number="item.harga_beli" min="0" 
-                                            class="w-full px-2 py-1 border border-gray-200 rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm">
+                                        <input type="text" x-model="item.harga_beli" @input="item.harga_beli = formatNumberRibuan($event.target.value)"
+                                            class="w-full px-2 py-1 border border-gray-200 rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
                                     </td>
-                                    <td class="px-4 py-3 text-right font-medium text-gray-900" x-text="formatRupiah(item.jumlah * item.harga_beli)">
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="text-gray-900" x-text="formatRupiah(item.harga_jual)"></div>
+                                    </td>
+                                    <td class="px-4 py-3 text-right font-medium text-gray-900" x-text="formatRupiah(unformatNumberRibuan(item.jumlah) * unformatNumberRibuan(item.harga_beli))">
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <button type="button" @click="removeItem(index)" class="text-red-400 hover:text-red-600">
@@ -165,12 +178,23 @@
 </div>
 
 <script>
+window.unformatNumberRibuan = function(n) {
+    if (!n) return "";
+    return String(n).replace(/\./g, "");
+};
+
+window.formatNumberRibuan = function(n) {
+    if (!n) return "";
+    return String(n).replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('kulakanHandler', () => ({
         form: {
             nomor_faktur: '{{ $nomorFaktur }}',
             tanggal: new Date().toISOString().slice(0, 16),
             supplier_id: '',
+            metode_pembayaran: '',
             keterangan: '',
             items: []
         },
@@ -180,7 +204,12 @@ document.addEventListener('alpine:init', () => {
         isSubmitting: false,
 
         get grandTotal() {
-            return this.form.items.reduce((sum, item) => sum + (item.jumlah * item.harga_beli), 0);
+            const total = this.form.items.reduce((sum, item) => {
+                const qty = parseFloat(unformatNumberRibuan(item.jumlah)) || 0;
+                const harga = parseFloat(unformatNumberRibuan(item.harga_beli)) || 0;
+                return sum + (qty * harga);
+            }, 0);
+            return Math.round(total);
         },
 
         openProductModal() {
@@ -211,8 +240,9 @@ document.addEventListener('alpine:init', () => {
                 this.form.items.push({
                     kode_barang: product.kode_barang,
                     nama_barang: product.nama_barang,
-                    jumlah: 1,
-                    harga_beli: product.harga_beli_terakhir || 0
+                    jumlah: "1",
+                    harga_beli: formatNumberRibuan(Math.round(product.harga_beli_terakhir || 0)),
+                    harga_jual: Math.round(product.harga_jual_normal || 0)
                 });
             }
             this.showModal = false;
@@ -227,6 +257,16 @@ document.addEventListener('alpine:init', () => {
             if (!confirm('Simpan transaksi pembelian ini? Stok barang akan bertambah.')) return;
 
             this.isSubmitting = true;
+            // Prepare data by unformatting numbers
+            const preparedForm = {
+                ...this.form,
+                items: this.form.items.map(item => ({
+                    ...item,
+                    jumlah: unformatNumberRibuan(item.jumlah),
+                    harga_beli: unformatNumberRibuan(item.harga_beli)
+                }))
+            };
+
             try {
                 const response = await fetch('{{ route("admin.pembelian.store") }}', {
                     method: 'POST',
@@ -234,7 +274,7 @@ document.addEventListener('alpine:init', () => {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify(this.form)
+                    body: JSON.stringify(preparedForm)
                 });
                 
                 const result = await response.json();
@@ -254,7 +294,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
         }
     }));
 });

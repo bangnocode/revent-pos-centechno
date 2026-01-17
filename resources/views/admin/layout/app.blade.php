@@ -158,7 +158,7 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        <span class="font-medium">Buka Revent</span>
+                        <span class="font-medium">Buka Kasir</span>
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="mt-2 text-center">
                         @csrf
@@ -245,6 +245,40 @@
                     if (window.innerWidth < 768 && alpineData) {
                         alpineData.mobileMenuOpen = false;
                     }
+                });
+            });
+
+            // --- Thousand Formatter Helpers ---
+            window.formatNumberRibuan = function(n) {
+                if (n === null || n === undefined || n === "") return "";
+                // Remove everything except digits
+                let value = String(n).replace(/\D/g, "");
+                // Apply thousand separators
+                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            };
+
+            window.unformatNumberRibuan = function(n) {
+                if (n === null || n === undefined || n === "") return "";
+                return String(n).replace(/\D/g, "");
+            };
+
+            // Auto apply to elements with .mask-ribuan
+            const applyMask = (el) => {
+                el.value = formatNumberRibuan(el.value);
+                el.addEventListener('input', function(e) {
+                    const originalValue = unformatNumberRibuan(this.value);
+                    this.value = formatNumberRibuan(originalValue);
+                });
+            };
+
+            document.querySelectorAll('.mask-ribuan').forEach(applyMask);
+
+            // Clean up before form submit
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    this.querySelectorAll('.mask-ribuan').forEach(input => {
+                        input.value = unformatNumberRibuan(input.value);
+                    });
                 });
             });
         });
