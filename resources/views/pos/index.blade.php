@@ -657,6 +657,7 @@
                             class="flex-1 flex justify-center gap-1 px-3 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             Batal <span class="hidden lg:flex">(ESC)</span>
                         </button>
+                        @auth
                         <button @click="prosesPembayaran" 
                             :disabled="(pembayaran.uang_dibayar < total && pembayaran.metode_pembayaran !== 'hutang') || isProcessing"
                             :class="{
@@ -682,6 +683,12 @@
                                 Proses <span class="hidden lg:flex">(Enter)</span>
                             </span>
                         </button>
+                        @else
+                        <button disabled
+                            class="flex-1 px-3 py-2 bg-gray-400 cursor-not-allowed text-white rounded text-xs font-medium transition-colors flex items-center justify-center gap-1.5">
+                            Login untuk Proses
+                        </button>
+                        @endauth
                     </div>
                 </div>
             </div>

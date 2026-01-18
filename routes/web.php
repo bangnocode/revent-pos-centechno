@@ -17,7 +17,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // POS Routes
-Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
+Route::middleware(['guest.or.auth'])->group(function () {
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/cari-barang', [PosController::class, 'cariBarang'])->name('pos.cari-barang');
     Route::post('/pos/simpan-transaksi', [PosController::class, 'simpanTransaksi'])->name('pos.simpan-transaksi');
@@ -25,7 +25,7 @@ Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['guest.or.auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('barang/search', [\App\Http\Controllers\Admin\BarangController::class, 'search'])->name('barang.search');
     Route::resource('barang', \App\Http\Controllers\Admin\BarangController::class);

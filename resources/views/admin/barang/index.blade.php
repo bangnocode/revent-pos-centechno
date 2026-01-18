@@ -6,12 +6,14 @@
         <h2 class="text-2xl font-bold text-gray-800">Daftar Barang</h2>
         <p class="text-sm text-gray-500">Kelola katalog produk toko anda</p>
     </div>
+    @auth
     <a href="{{ route('admin.barang.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Tambah Barang
     </a>
+    @endauth
 </div>
 
 <!-- Search & Filter Filter -->
@@ -70,6 +72,7 @@
                         Rp {{ number_format($item->harga_jual_normal * $item->stok_sekarang, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-4 text-center">
+                        @auth
                         <div class="flex items-center justify-center gap-2">
                             <a href="{{ route('admin.barang.edit', $item->kode_barang) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,6 +89,9 @@
                                 </button>
                             </form>
                         </div>
+                        @else
+                        <span class="text-gray-400 text-sm">Login untuk aksi</span>
+                        @endauth
                     </td>
                 </tr>
                 @empty

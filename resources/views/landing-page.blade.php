@@ -29,9 +29,11 @@
                     <a href="#fitur" class="text-gray-500 hover:text-blue-600 transition duration-200">Fitur</a>
                     <a href="#keunggulan" class="text-gray-500 hover:text-blue-600 transition duration-200">Tentang</a>
                     <a href="#footer" class="text-gyray-500 hover:text-blue-600 transition duration-200">Kontak</a>
+                    <a href="{{ route('pos.index') }}" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200">Lihat Demo</a>
                     <a href="{{route('login')}}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">Login</a>
                 </div>
                 <div class="md:hidden flex items-center space-x-3">
+                    <a href="{{ route('pos.index') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition duration-200 font-medium">Demo</a>
                     <a href="{{route('login')}}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition duration-200 font-medium">Login</a>
                     <button id="mobile-menu-button" class="text-gray-500 hover:text-blue-600 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
