@@ -99,12 +99,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <span class="font-medium">{{ auth()->user()->name }}</span>
+                            <span class="font-medium">@auth {{ auth()->user()->name }} @else Guest @endauth</span>
                             <span class="text-blue-200 text-xs">•</span>
                             <span>@{{ currentDate }}</span>
                             <span>@{{ currentTime }}</span>
                         </div>
                         
+                        @auth
                         <form action="{{ route('logout') }}" method="POST" class="inline-block">
                             @csrf
                             <button type="submit" class="bg-red-500 hover:bg-red-600 text-white rounded px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1" title="Logout">
@@ -114,6 +115,14 @@
                                 <span>Keluar</span>
                             </button>
                         </form>
+                        @else
+                        <a href="{{ route('login') }}" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1" title="Login">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Login</span>
+                        </a>
+                        @endauth
                     </div>
                 </div>
 
