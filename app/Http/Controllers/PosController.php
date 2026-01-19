@@ -194,6 +194,7 @@ class PosController extends Controller
                     $stokSebelum = $barang->stok_sekarang;
                     $barang->decrement('stok_sekarang', $jumlah);
                     $barang->tgl_stok_keluar = now()->toDateString(); // Set tgl_stok_keluar
+                    $barang->save(); // Save the changes
                     $stokSesudah = $barang->stok_sekarang;
 
                     // Log inventory
