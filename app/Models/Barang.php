@@ -21,6 +21,7 @@ class Barang extends Model
         'kategori',
         'merek',
         'satuan',
+        'satuan_id',
         'stok_sekarang',
         'stok_minimum',
         'harga_beli_terakhir',
@@ -28,7 +29,16 @@ class Barang extends Model
         'harga_jual_grosir',
         'diskon_maksimum',
         'supplier_utama',
+        'nama_supplier',
+        'tgl_stok_masuk',
+        'tgl_stok_keluar',
         'tanggal_kadaluarsa',
         'status_aktif'
     ];
+
+    // Relasi dengan Satuan
+    public function satuan()
+    {
+        return $this->belongsTo(Satuan::class, 'satuan_id');
+    }
 }

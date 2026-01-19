@@ -97,6 +97,93 @@ createApp({
                 // Extract only numbers from input
                 let value = e.target.value.replace(/[^\d]/g, '');
                 pembayaran.value.uang_dibayar = value ? parseInt(value) : 0;
+            },
+
+            printThermalReceipt: async (nomorFaktur) => {
+                try {
+                    // Fetch invoice data
+                    const response = await axios.get(`/pos/print-invoice-data/${nomorFaktur}`);
+                    const transaksi = response.data;
+
+                    // Check if Web Serial API is supported
+                    if ('serial' in navigator) {
+                        const port = await navigator.serial.requestPort();
+                        await port.open({ baudRate: 9600 });
+
+                        const writer = port.writable.getWriter();
+                        const encoder = new TextEncoder();
+
+                        // ESC/POS commands for thermal printer
+                        let receipt = '\x1B\x40'; // Initialize printer
+                        receipt += '\x1B\x61\x01'; // Center align
+                        receipt += 'TOKO CT\n';
+                        receipt += 'Jl. Contoh No. 123\n';
+                        receipt += 'Telp: 0812-3456-7890\n';
+                        receipt += '\n';
+                        receipt += `FAKTUR: ${transaksi.nomor_faktur}\n`;
+                        receipt += `Tanggal: ${new Date(transaksi.tanggal_transaksi).toLocaleString('id-ID')}\n`;
+                        receipt += `Kasir: ${transaksi.id_operator}\n`;
+                        receipt += `Pelanggan: ${transaksi.nama_pelanggan}\n`;
+                        receipt += '\x1B\x61\x00'; // Left align
+                        receipt += '================================\n';
+                        receipt += 'Barang          Qty    Subtotal\n';
+                        receipt += '================================\n';
+
+                        transaksi.details.forEach(item => {
+                            const nama = item.nama_barang.substring(0, 14);
+                            const qty = `${item.jumlah} ${item.satuan}`.padStart(6);
+                            const subtotal = `Rp ${utils.formatRupiah(item.subtotal_item)}`.padStart(10);
+                            receipt += `${nama.padEnd(14)} ${qty} ${subtotal}\n`;
+                        });
+
+                        receipt += '================================\n';
+                        receipt += `Subtotal: Rp ${utils.formatRupiah(transaksi.subtotal)}\n`;
+                        if (transaksi.diskon_transaksi > 0) {
+                            receipt += `Diskon: Rp ${utils.formatRupiah(transaksi.diskon_transaksi)}\n`;
+                        }
+                        receipt += `Total: Rp ${utils.formatRupiah(transaksi.total_transaksi)}\n`;
+                        receipt += `Bayar: Rp ${utils.formatRupiah(transaksi.total_bayar)}\n`;
+                        const kembalian = transaksi.total_bayar - transaksi.total_transaksi;
+                        if (kembalian >= 0) {
+                            receipt += `Kembalian: Rp ${utils.formatRupiah(kembalian)}\n`;
+                        } else {
+                            receipt += `Kurang: Rp ${utils.formatRupiah(Math.abs(kembalian))}\n`;
+                        }
+                        receipt += '\nTerima Kasih!\n';
+                        receipt += '\x1D\x56\x42\x00'; // Cut paper
+
+                        await writer.write(encoder.encode(receipt));
+                        await writer.close();
+                        await port.close();
+                    } else {
+                        // Fallback to browser print
+                        const printWindow = window.open(
+                            `/pos/print-invoice/${nomorFaktur}?autoprint=true`,
+                            '_blank',
+                            'width=400,height=600'
+                        );
+                        setTimeout(() => {
+                            if (printWindow && !printWindow.closed) {
+                                printWindow.print();
+                                setTimeout(() => printWindow.close(), 5000);
+                            }
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('Print error:', error);
+                    // Fallback to browser print
+                    const printWindow = window.open(
+                        `/pos/print-invoice/${nomorFaktur}?autoprint=true`,
+                        '_blank',
+                        'width=400,height=600'
+                    );
+                    setTimeout(() => {
+                        if (printWindow && !printWindow.closed) {
+                            printWindow.print();
+                            setTimeout(() => printWindow.close(), 5000);
+                        }
+                    }, 1000);
+                }
             }
         };
 
@@ -513,21 +600,8 @@ createApp({
                         state.showModal.value = false;
                         state.diskonTransaksi.value = 0;
 
-                        // Buka window untuk print dengan parameter autoprint
-                        const printWindow = window.open(
-                            `/pos/print-invoice/${response.data.nomor_faktur}?autoprint=true`,
-                            '_blank',
-                            'width=400,height=600'
-                        );
-
-                        // Atau langsung print setelah beberapa detik
-                        setTimeout(() => {
-                            if (printWindow && !printWindow.closed) {
-                                printWindow.print();
-                                // Optional: close setelah 5 detik
-                                // setTimeout(() => printWindow.close(), 5000);
-                            }
-                        }, 1000);
+                        // Print thermal receipt
+                        await utils.printThermalReceipt(response.data.nomor_faktur);
 
                         core.focusBarcode();
                     }

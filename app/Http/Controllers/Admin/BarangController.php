@@ -15,14 +15,14 @@ class BarangController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-        
-        $barang = Barang::when($keyword, function($query, $keyword) {
+
+        $barang = Barang::when($keyword, function ($query, $keyword) {
             return $query->where('nama_barang', 'like', "%{$keyword}%")
-                         ->orWhere('kode_barang', 'like', "%{$keyword}%")
-                         ->orWhere('barcode', 'like', "%{$keyword}%");
+                ->orWhere('kode_barang', 'like', "%{$keyword}%")
+                ->orWhere('barcode', 'like', "%{$keyword}%");
         })
-        ->orderBy('nama_barang', 'asc')
-        ->paginate(10);
+            ->orderBy('nama_barang', 'asc')
+            ->paginate(10);
 
         return view('admin.barang.index', compact('barang', 'keyword'));
     }
@@ -32,7 +32,9 @@ class BarangController extends Controller
      */
     public function create()
     {
-        return view('admin.barang.create');
+        $satuans = \App\Models\Satuan::aktif()->orderBy('nama_satuan')->get();
+        $suppliers = \App\Models\Supplier::where('status_aktif', true)->orderBy('nama_supplier')->get();
+        return view('admin.barang.create', compact('satuans', 'suppliers'));
     }
 
     /**
@@ -45,16 +47,22 @@ class BarangController extends Controller
             'barcode' => 'nullable|unique:barang,barcode|max:50',
             'nama_barang' => 'required|max:100',
             'kategori' => 'nullable|max:50',
-            'satuan' => 'required|max:20',
+            'satuan_id' => 'required|exists:satuans,id',
+            'nama_supplier' => 'nullable|string|max:100',
             'harga_beli_terakhir' => 'required|numeric|min:0',
             'harga_jual_normal' => 'required|numeric|min:0',
             'stok_sekarang' => 'required|numeric',
         ]);
 
-        Barang::create($request->all());
+        $data = $request->all();
+        // Set satuan field untuk backward compatibility
+        $satuan = \App\Models\Satuan::find($request->satuan_id);
+        $data['satuan'] = $satuan->nama_satuan;
+
+        Barang::create($data);
 
         return redirect()->route('admin.barang.index')
-                         ->with('success', 'Barang berhasil ditambahkan');
+            ->with('success', 'Barang berhasil ditambahkan');
     }
 
     /**
@@ -63,7 +71,9 @@ class BarangController extends Controller
     public function edit($id)
     {
         $barang = Barang::findOrFail($id);
-        return view('admin.barang.edit', compact('barang'));
+        $satuans = \App\Models\Satuan::aktif()->orderBy('nama_satuan')->get();
+        $suppliers = \App\Models\Supplier::where('status_aktif', true)->orderBy('nama_supplier')->get();
+        return view('admin.barang.edit', compact('barang', 'satuans', 'suppliers'));
     }
 
     /**
@@ -76,7 +86,8 @@ class BarangController extends Controller
         $request->validate([
             'nama_barang' => 'required|max:100',
             'kategori' => 'nullable|max:50',
-            'satuan' => 'required|max:20',
+            'satuan_id' => 'required|exists:satuans,id',
+            'nama_supplier' => 'nullable|string|max:100',
             'harga_beli_terakhir' => 'required|numeric|min:0',
             'harga_jual_normal' => 'required|numeric|min:0',
             'stok_sekarang' => 'required|numeric',
@@ -84,10 +95,15 @@ class BarangController extends Controller
             'barcode' => 'nullable|max:50|unique:barang,barcode,' . $id . ',kode_barang',
         ]);
 
-        $barang->update($request->all());
+        $data = $request->all();
+        // Set satuan field untuk backward compatibility
+        $satuan = \App\Models\Satuan::find($request->satuan_id);
+        $data['satuan'] = $satuan->nama_satuan;
+
+        $barang->update($data);
 
         return redirect()->route('admin.barang.index')
-                         ->with('success', 'Barang berhasil diperbarui');
+            ->with('success', 'Barang berhasil diperbarui');
     }
 
     /**
@@ -102,18 +118,19 @@ class BarangController extends Controller
         $barang->delete();
 
         return redirect()->route('admin.barang.index')
-                         ->with('success', 'Barang berhasil dihapus');
+            ->with('success', 'Barang berhasil dihapus');
     }
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
         $keyword = $request->input('keyword');
         if (empty($keyword)) return response()->json([]);
 
         $barang = Barang::where('nama_barang', 'like', "%{$keyword}%")
-                        ->orWhere('kode_barang', 'like', "%{$keyword}%")
-                        ->orWhere('barcode', 'like', "%{$keyword}%")
-                        ->limit(10)
-                        ->get();
+            ->orWhere('kode_barang', 'like', "%{$keyword}%")
+            ->orWhere('barcode', 'like', "%{$keyword}%")
+            ->limit(10)
+            ->get();
         return response()->json($barang);
     }
 }

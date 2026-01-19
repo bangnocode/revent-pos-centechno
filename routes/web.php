@@ -22,6 +22,7 @@ Route::middleware(['guest.or.auth'])->group(function () {
     Route::post('/pos/cari-barang', [PosController::class, 'cariBarang'])->name('pos.cari-barang');
     Route::post('/pos/simpan-transaksi', [PosController::class, 'simpanTransaksi'])->name('pos.simpan-transaksi');
     Route::get('/pos/print-invoice/{faktur}', [PosController::class, 'printInvoice']);
+    Route::get('/pos/print-invoice-data/{faktur}', [PosController::class, 'printInvoiceData']);
 });
 
 // Admin Routes
@@ -37,4 +38,5 @@ Route::middleware(['guest.or.auth'])->prefix('admin')->name('admin.')->group(fun
     // Supplier & Kulakan
     Route::resource('supplier', \App\Http\Controllers\Admin\SupplierController::class);
     Route::resource('pembelian', \App\Http\Controllers\Admin\PembelianController::class);
+    Route::resource('satuan', \App\Http\Controllers\Admin\SatuanController::class);
 });

@@ -27,6 +27,17 @@ class PosController extends Controller
         return view('pos.invoice', compact('transaksi'));
     }
 
+    public function printInvoiceData($nomor_faktur)
+    {
+        $transaksi = TransaksiPenjualan::with('details')->where('nomor_faktur', $nomor_faktur)->first();
+
+        if (!$transaksi) {
+            return response()->json(['error' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+        return response()->json($transaksi);
+    }
+
     /**
      * Tampilkan halaman utama POS
      */
@@ -182,6 +193,7 @@ class PosController extends Controller
                     // Update stok
                     $stokSebelum = $barang->stok_sekarang;
                     $barang->decrement('stok_sekarang', $jumlah);
+                    $barang->tgl_stok_keluar = now()->toDateString(); // Set tgl_stok_keluar
                     $stokSesudah = $barang->stok_sekarang;
 
                     // Log inventory

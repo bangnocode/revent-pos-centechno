@@ -43,6 +43,9 @@
                     <th class="px-6 py-3 text-right">Harga Jual</th>
                     <th class="px-6 py-3 text-center">Stok</th>
                     <th class="px-6 py-3 text-right">Nilai Stok</th>
+                    <th class="px-6 py-3">Supplier</th>
+                    <th class="px-6 py-3 text-center">Stok Masuk</th>
+                    <th class="px-6 py-3 text-center">Stok Keluar</th>
                     <th class="px-6 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -71,6 +74,27 @@
                     <td class="px-6 py-4 text-right font-medium text-gray-900">
                         Rp {{ number_format($item->harga_jual_normal * $item->stok_sekarang, 0, ',', '.') }}
                     </td>
+                    <td class="px-6 py-4">
+                        @if($item->nama_supplier)
+                            <span class="text-sm text-gray-700">{{ $item->nama_supplier }}</span>
+                        @else
+                            <span class="text-gray-400">-</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        @if($item->tgl_stok_masuk)
+                            <span class="text-sm text-gray-700">{{ date('d/m/Y', strtotime($item->tgl_stok_masuk)) }}</span>
+                        @else
+                            <span class="text-gray-400">-</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        @if($item->tgl_stok_keluar)
+                            <span class="text-sm text-gray-700">{{ date('d/m/Y', strtotime($item->tgl_stok_keluar)) }}</span>
+                        @else
+                            <span class="text-gray-400">-</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-center">
                         @auth
                         <div class="flex items-center justify-center gap-2">
@@ -96,7 +120,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>

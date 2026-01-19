@@ -63,5 +63,8 @@ class DatabaseSeeder extends Seeder
                 'status_aktif' => true,
             ]
         );
+
+        // Seed Satuan
+        $this->call(SatuanSeeder::class);
     }
 }

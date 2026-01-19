@@ -11,6 +11,9 @@
     <!-- Heroicons CDN -->
     <script src="https://unpkg.com/@heroicons/vue@2.0.0/outline/index.js"></script>
 
+    <!-- Thermal Printer Library -->
+    <script src="https://cdn.jsdelivr.net/npm/escpos@3.0.0-alpha.6/dist/escpos.min.js"></script>
+
     <style>
         [v-cloak] {
             display: none;

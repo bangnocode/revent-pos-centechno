@@ -112,6 +112,8 @@ class PembelianController extends Controller
 
                     $barang->stok_sekarang += $item['jumlah'];
                     $barang->harga_beli_terakhir = $item['harga_beli'];
+                    $barang->tgl_stok_masuk = now()->toDateString(); // Set tgl_stok_masuk
+                    $barang->nama_supplier = $pembelian->supplier->nama_supplier; // Set nama_supplier
                     $barang->save();
 
                     // 4. Log Inventory

@@ -77,12 +77,44 @@
 
             <!-- Right: Items -->
             <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-5">
-                <h3 class="font-semibold text-gray-800 mb-4 border-b pb-2 flex justify-between items-center">
-                    <span>List Barang</span>
-                    <button type="button" @click="openProductModal" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded hover:bg-slate-200 transition">
-                        + Tambah Barang
-                    </button>
-                </h3>
+                <h3 class="font-semibold text-gray-800 mb-4 border-b pb-2">List Barang</h3>
+
+                <!-- Add Item Form -->
+                <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="space-y-4">
+                        <!-- Row 1: Kode Barang and Quantity -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Barang <span class="text-red-500">*</span></label>
+                                <input type="text" x-model="newItem.kode_barang" @input="validateKodeBarang"
+                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                    placeholder="Masukkan kode barang">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
+                                <input type="number" x-model.number="newItem.jumlah" min="1" step="1" maxlength="6" max="100000"
+                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                    placeholder="0">
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Validation Message and Button -->
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <div class="flex-1">
+                                <div x-show="validationMessage" class="text-sm" :class="isValidKode ? 'text-green-600' : 'text-red-600'" x-text="validationMessage"></div>
+                                <div x-show="selectedBarang" class="mt-1 text-sm text-gray-600">
+                                    <strong x-text="selectedBarang.nama_barang"></strong> | Stok: <span x-text="selectedBarang.stok_sekarang"></span> | Harga Jual: <span x-text="formatRupiah(selectedBarang.harga_jual_normal)"></span>
+                                </div>
+                            </div>
+                            <div class="w-full sm:w-auto">
+                                <button type="button" @click="addItem" :disabled="!isValidKode || !newItem.jumlah"
+                                    class="w-full sm:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-sm">
+                                    Tambah Barang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
@@ -136,45 +168,6 @@
             </div>
         </div>
     </form>
-    
-    <!-- Product Search Modal -->
-    <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-        <div class="fixed inset-0 bg-black bg-opacity-30 transition-opacity" @click="showModal = false"></div>
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white p-6 text-left shadow-xl transition-all">
-                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Cari Barang</h3>
-                <div class="mb-4">
-                    <input type="text" x-model="searchKeyword" @input.debounce.500ms="searchProducts"
-                        placeholder="Ketik nama atau kode barang..." autofocus
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                </div>
-                
-                <div class="max-h-60 overflow-y-auto space-y-2">
-                    <template x-for="product in searchResults" :key="product.kode_barang">
-                        <div @click="addToCart(product)" 
-                            class="p-3 border rounded-lg hover:bg-blue-50 cursor-pointer transition flex justify-between items-center group">
-                            <div>
-                                <div class="font-medium text-gray-800" x-text="product.nama_barang"></div>
-                                <div class="text-xs text-gray-500">
-                                    Stok: <span x-text="product.stok_sekarang"></span> | 
-                                    Beli Terakhir: <span x-text="formatRupiah(product.harga_beli_terakhir)"></span>
-                                </div>
-                            </div>
-                            <button class="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">Pilih</button>
-                        </div>
-                    </template>
-                    <div x-show="searchResults.length === 0 && searchKeyword.length > 2" class="text-center py-4 text-gray-500 text-sm">
-                        Tidak ada barang ditemukan.
-                    </div>
-                </div>
-
-                <div class="mt-4 flex justify-end">
-                    <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
@@ -198,9 +191,13 @@ document.addEventListener('alpine:init', () => {
             keterangan: '',
             items: []
         },
-        showModal: false,
-        searchKeyword: '',
-        searchResults: [],
+        newItem: {
+            kode_barang: '',
+            jumlah: 0
+        },
+        selectedBarang: null,
+        isValidKode: false,
+        validationMessage: '',
         isSubmitting: false,
 
         get grandTotal() {
@@ -212,40 +209,55 @@ document.addEventListener('alpine:init', () => {
             return Math.round(total);
         },
 
-        openProductModal() {
-            this.showModal = true;
-            this.searchKeyword = '';
-            this.searchResults = [];
-            // Focus input hack
-            setTimeout(() => document.querySelector('[x-model="searchKeyword"]')?.focus(), 100);
-        },
-
-        async searchProducts() {
-            if (this.searchKeyword.length < 2) return;
+        async validateKodeBarang() {
+            if (this.newItem.kode_barang.length < 2) {
+                this.isValidKode = false;
+                this.validationMessage = '';
+                this.selectedBarang = null;
+                return;
+            }
             try {
-                const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.searchKeyword}`);
+                const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.newItem.kode_barang}`);
                 const data = await response.json();
-                this.searchResults = data; 
+                const barang = data.find(b => b.kode_barang === this.newItem.kode_barang);
+                if (barang) {
+                    this.isValidKode = true;
+                    this.validationMessage = 'Barang ditemukan';
+                    this.selectedBarang = barang;
+                } else {
+                    this.isValidKode = false;
+                    this.validationMessage = 'Kode barang tidak ditemukan';
+                    this.selectedBarang = null;
+                }
             } catch (e) {
+                this.isValidKode = false;
+                this.validationMessage = 'Error validasi';
+                this.selectedBarang = null;
                 console.error(e);
             }
         },
 
-        addToCart(product) {
-            // Check if exists
-            const existing = this.form.items.find(i => i.kode_barang === product.kode_barang);
+        addItem() {
+            if (!this.isValidKode || !this.newItem.jumlah) return;
+            // Check if already in cart
+            const existing = this.form.items.find(i => i.kode_barang === this.newItem.kode_barang);
             if (existing) {
-                existing.jumlah++;
+                existing.jumlah = (parseFloat(existing.jumlah) + parseFloat(this.newItem.jumlah)).toString();
             } else {
                 this.form.items.push({
-                    kode_barang: product.kode_barang,
-                    nama_barang: product.nama_barang,
-                    jumlah: "1",
-                    harga_beli: formatNumberRibuan(Math.round(product.harga_beli_terakhir || 0)),
-                    harga_jual: Math.round(product.harga_jual_normal || 0)
+                    kode_barang: this.newItem.kode_barang,
+                    nama_barang: this.selectedBarang.nama_barang,
+                    jumlah: this.newItem.jumlah.toString(),
+                    harga_beli: formatNumberRibuan(Math.round(this.selectedBarang.harga_beli_terakhir || 0)),
+                    harga_jual: Math.round(this.selectedBarang.harga_jual_normal || 0)
                 });
             }
-            this.showModal = false;
+            // Reset
+            this.newItem.kode_barang = '';
+            this.newItem.jumlah = 0;
+            this.selectedBarang = null;
+            this.isValidKode = false;
+            this.validationMessage = '';
         },
 
         removeItem(index) {
