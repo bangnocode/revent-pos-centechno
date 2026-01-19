@@ -92,7 +92,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
-                                <input type="number" x-model.number="newItem.jumlah" min="1" step="1" maxlength="6" max="100000"
+                                <input type="number" x-model.number="newItem.jumlah" min="0" step="1" maxlength="6" max="100000"
                                     class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
                                     placeholder="0">
                             </div>
