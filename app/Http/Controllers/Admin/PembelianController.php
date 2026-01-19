@@ -89,7 +89,7 @@ class PembelianController extends Controller
                     'supplier_id' => $request->supplier_id,
                     'total_harga' => collect($request->items)->sum(fn($item) => $item['jumlah'] * $item['harga_beli']),
                     'status' => 'selesai', // Directly finished for now
-                    'metode_pembayaran' => $request->metode_pembayaran,
+                    'metode_pembayaran' => $request->metode_pembayaran ?? 'tunai',
                     'keterangan' => $request->keterangan,
                     'user_id' => auth()->id(),
                 ]);
