@@ -4,7 +4,7 @@
 <div class="max-w-5xl mx-auto" x-data="kulakanHandler()">
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Input Kulakan (PO)</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Input Kulakan</h2>
             <p class="text-sm text-gray-500">Catat pembelian barang dari supplier</p>
         </div>
     </div>
@@ -86,15 +86,30 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Kode Barang <span class="text-red-500">*</span></label>
-                                <input type="text" x-model="newItem.kode_barang" @input="validateKodeBarang"
-                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
-                                    placeholder="Masukkan kode barang">
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="newItem.kode_barang" @input="validateKodeBarang"
+                                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                        placeholder="Masukkan kode barang">
+                                    <button type="button" @click="openBarangModal" 
+                                        class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm">
+                                        Cari
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
                                 <input type="number" x-model.number="newItem.jumlah" min="0" step="1" maxlength="6" max="100000"
                                     class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
                                     placeholder="0">
+                            </div>
+                        </div>
+                        <!-- Row 2: Subtotal -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal <span class="text-red-500">*</span></label>
+                                <input type="text" x-model="newItem.subtotal" @input="newItem.subtotal = formatNumberRibuan($event.target.value)"
+                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                    placeholder="0" inputmode="numeric">
                             </div>
                         </div>
 
@@ -107,7 +122,7 @@
                                 </div>
                             </div>
                             <div class="w-full sm:w-auto">
-                                <button type="button" @click="addItem" :disabled="!isValidKode || !newItem.jumlah"
+                                <button type="button" @click="addItem" :disabled="!isValidKode || !newItem.jumlah || !newItem.subtotal"
                                     class="w-full sm:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-sm">
                                     Tambah Barang
                                 </button>
@@ -168,6 +183,38 @@
             </div>
         </div>
     </form>
+
+    <!-- Modal Cari Barang -->
+    <div x-show="showBarangModal" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            <div class="p-4 border-b">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Cari Barang</h3>
+                    <button @click="closeBarangModal" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <input type="text" x-model="barangSearchKeyword" @input="searchBarang" 
+                    class="w-full mt-3 px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                    placeholder="Cari nama barang, kode, atau barcode...">
+            </div>
+            <div class="p-4 max-h-96 overflow-y-auto">
+                <div x-show="barangList.length === 0" class="text-center text-gray-500 py-8">
+                    Tidak ada barang ditemukan
+                </div>
+                <div x-show="barangList.length > 0" class="space-y-2">
+                    <template x-for="barang in barangList" :key="barang.id">
+                        <div @click="selectBarang(barang)" class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <div class="font-medium text-gray-900" x-text="barang.nama_barang"></div>
+                            <div class="text-sm text-gray-600">Kode: <span x-text="barang.kode_barang"></span> | Stok: <span x-text="barang.stok_sekarang"></span></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -193,12 +240,16 @@ document.addEventListener('alpine:init', () => {
         },
         newItem: {
             kode_barang: '',
-            jumlah: 0
+            jumlah: 0,
+            subtotal: ''
         },
         selectedBarang: null,
         isValidKode: false,
         validationMessage: '',
         isSubmitting: false,
+        showBarangModal: false,
+        barangSearchKeyword: '',
+        barangList: [],
 
         get grandTotal() {
             const total = this.form.items.reduce((sum, item) => {
@@ -219,7 +270,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.newItem.kode_barang}`);
                 const data = await response.json();
-                const barang = data.find(b => b.kode_barang === this.newItem.kode_barang);
+                const barang = data.find(b => b.kode_barang.toLowerCase() === this.newItem.kode_barang.toLowerCase());
                 if (barang) {
                     this.isValidKode = true;
                     this.validationMessage = 'Barang ditemukan';
@@ -238,23 +289,28 @@ document.addEventListener('alpine:init', () => {
         },
 
         addItem() {
-            if (!this.isValidKode || !this.newItem.jumlah) return;
+            if (!this.isValidKode || !this.newItem.jumlah || !this.newItem.subtotal) return;
+            const subtotal = unformatNumberRibuan(this.newItem.subtotal);
+            const jumlah = parseFloat(this.newItem.jumlah);
+            if (jumlah <= 0 || subtotal <= 0) return;
+            const hargaBeli = Math.round(subtotal / jumlah);
             // Check if already in cart
             const existing = this.form.items.find(i => i.kode_barang === this.newItem.kode_barang);
             if (existing) {
-                existing.jumlah = (parseFloat(existing.jumlah) + parseFloat(this.newItem.jumlah)).toString();
+                existing.jumlah = (parseFloat(existing.jumlah) + jumlah).toString();
             } else {
                 this.form.items.push({
                     kode_barang: this.newItem.kode_barang,
                     nama_barang: this.selectedBarang.nama_barang,
                     jumlah: this.newItem.jumlah.toString(),
-                    harga_beli: formatNumberRibuan(Math.round(this.selectedBarang.harga_beli_terakhir || 0)),
+                    harga_beli: formatNumberRibuan(hargaBeli),
                     harga_jual: Math.round(this.selectedBarang.harga_jual_normal || 0)
                 });
             }
             // Reset
             this.newItem.kode_barang = '';
             this.newItem.jumlah = 0;
+            this.newItem.subtotal = '';
             this.selectedBarang = null;
             this.isValidKode = false;
             this.validationMessage = '';
@@ -307,6 +363,38 @@ document.addEventListener('alpine:init', () => {
 
         formatRupiah(number) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
+        },
+
+        openBarangModal() {
+            this.showBarangModal = true;
+            this.barangSearchKeyword = '';
+            this.barangList = [];
+        },
+
+        closeBarangModal() {
+            this.showBarangModal = false;
+            this.barangSearchKeyword = '';
+            this.barangList = [];
+        },
+
+        async searchBarang() {
+            if (this.barangSearchKeyword.length < 1) {
+                this.barangList = [];
+                return;
+            }
+            try {
+                const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.barangSearchKeyword}`);
+                this.barangList = await response.json();
+            } catch (e) {
+                this.barangList = [];
+                console.error(e);
+            }
+        },
+
+        selectBarang(barang) {
+            this.newItem.kode_barang = barang.kode_barang;
+            this.validateKodeBarang();
+            this.closeBarangModal();
         }
     }));
 });
