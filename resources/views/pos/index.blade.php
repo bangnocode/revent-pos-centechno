@@ -111,4 +111,4 @@
     <!-- Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <script src="{{ asset('js/pos.js') }}?v={{ filemtime(public_path('js/pos.js')) }}"></script>
+    <script src="{{ asset('js/pos.js') }}?v={{ file_exists(public_path('js/pos.js')) ? filemtime(public_path('js/pos.js')) : time() }}"></script>
