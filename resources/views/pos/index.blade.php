@@ -859,6 +859,6 @@
     <!-- Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <script src="{{ asset('js/pos-logic.js') }}"></script>
+    <script src="{{ asset('js/pos-logic.js') }}?v={{ filemtime(public_path('js/pos-logic.js')) }}"></script>
 </body>
 
