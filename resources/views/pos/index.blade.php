@@ -611,10 +611,9 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500">Rp</span>
                             </div>
-                            <input :value="formatRupiah(diskonTransaksi)" type="text"
-                                @input="setDiskonTransaksi($event.target.value)" maxlength="12"
+                            <input :value="diskonInput" @input="handleDiskonInput" type="text"
                                 class="w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded text-right"
-                                placeholder="0" :disabled="isProcessing" inputmode="numeric">
+                                placeholder="0" :disabled="isProcessing" maxlength="15">
                         </div>
                         <p class="text-xs text-gray-500 mt-1">
                             Maks: Rp @{{ formatRupiah(subtotalSetelahDiskonItem) }}

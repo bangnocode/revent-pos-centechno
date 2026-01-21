@@ -27,6 +27,7 @@ createApp({
             isLoadingCari: ref(false),
             selectedSearchIndex: ref(-1),
             diskonTransaksi: ref(0),
+            diskonInput: ref('0'),
         };
 
         // Template Refs
@@ -89,8 +90,9 @@ createApp({
         // Utility Functions
         const utils = {
             formatRupiah: (angka) => {
-                const num = parseFloat(angka) || 0;
-                return new Intl.NumberFormat('id-ID').format(num);
+                let num = parseFloat(angka) || 0;
+                let str = Math.floor(num).toString(); // Ambil bagian integer
+                return str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             },
 
             formatUangDibayar: (e) => {
@@ -211,16 +213,6 @@ createApp({
                 core.updateSubtotal(index);
             },
 
-            setDiskonTransaksi: (value) => {
-                // Parse numeric value, removing formatting dots
-                let numericValue = value.toString().replace(/[^\d]/g, '');
-                let diskon = Math.max(0, parseInt(numericValue) || 0);
-                const maxDiskon = computedValues.subtotalSetelahDiskonItem.value;
-
-                // Limit diskon transaksi tidak lebih dari subtotal setelah diskon item
-                state.diskonTransaksi.value = Math.min(diskon, maxDiskon);
-            },
-
             manualInput: () => {
                 state.showModalCari.value = true;
                 state.keywordCari.value = '';
@@ -260,7 +252,7 @@ createApp({
 
                         if (existingIndex >= 0) {
                             const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
-                            if (newTotal > barang.stok_sekarang) {
+                            if (newTotal > parseFloat(barang.stok_sekarang)) {
                                 alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
                                 state.barcode.value = '';
                                 core.focusBarcode();
@@ -269,7 +261,7 @@ createApp({
                             state.cart.value[existingIndex].jumlah = newTotal;
                             core.updateSubtotal(existingIndex);
                         } else {
-                            if (barang.stok_sekarang < 1) {
+                            if (parseFloat(barang.stok_sekarang) < 1) {
                                 alert(`Stok ${barang.nama_barang} habis!`);
                                 state.barcode.value = '';
                                 core.focusBarcode();
@@ -315,6 +307,20 @@ createApp({
                 });
             },
 
+            handleDiskonInput: (event) => {
+                let value = event.target.value;
+                // Allow only numbers and dots, but we'll format
+                value = value.replace(/[^\d]/g, ''); // Remove non-digits for parsing
+                let numericValue = value;
+                let diskon = Math.max(0, parseInt(numericValue) || 0);
+                const maxDiskon = computedValues.subtotalSetelahDiskonItem.value;
+                state.diskonTransaksi.value = Math.min(diskon, maxDiskon);
+                // Format the input value
+                let formatted = utils.formatRupiah(state.diskonTransaksi.value);
+                event.target.value = formatted;
+                state.diskonInput.value = formatted;
+            },
+
             cariBarangManual: async () => {
                 if (!state.keywordCari.value.trim()) return;
 
@@ -352,14 +358,14 @@ createApp({
 
                 if (existingIndex >= 0) {
                     const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
-                    if (newTotal > barang.stok_sekarang) {
+                    if (newTotal > parseFloat(barang.stok_sekarang)) {
                         alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
                         return;
                     }
                     state.cart.value[existingIndex].jumlah = newTotal;
                     core.updateSubtotal(existingIndex);
                 } else {
-                    if (barang.stok_sekarang < 1) {
+                    if (parseFloat(barang.stok_sekarang) < 1) {
                         alert(`Stok ${barang.nama_barang} habis!`);
                         return;
                     }
@@ -822,7 +828,7 @@ createApp({
             tambahBarangDariPencarian: core.tambahBarangDariPencarian,
             tutupModalCari: core.tutupModalCari,
             setDiskonItem: core.setDiskonItem,
-            setDiskonTransaksi: core.setDiskonTransaksi,
+            handleDiskonInput: core.handleDiskonInput,
         };
     }
 }).mount('#app');
