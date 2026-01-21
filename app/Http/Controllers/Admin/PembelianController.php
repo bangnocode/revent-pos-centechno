@@ -71,7 +71,6 @@ class PembelianController extends Controller
     {
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
-            'metode_pembayaran' => 'required',
             'tanggal' => 'required|date',
             'nomor_faktur' => 'required|unique:pembelians,nomor_faktur',
             'items' => 'required|array|min:1',
