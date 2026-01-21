@@ -19,7 +19,7 @@
         <!-- Total Item -->
         <div class="flex justify-between py-1.5">
             <span class="text-xs text-gray-600">Total Item</span>
-            <span class="text-sm font-semibold text-gray-900">@{{ totalQty }} item</span>
+            <span class="text-sm font-semibold text-gray-900">@{{ Math.floor(totalQty) }} item</span>
         </div>
 
         <!-- Diskon Item (jika ada) -->

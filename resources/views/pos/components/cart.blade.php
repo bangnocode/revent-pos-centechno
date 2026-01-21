@@ -12,7 +12,7 @@
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
-                    @{{ cart.length }} item • @{{ totalQty }} pcs
+                    @{{ cart.length }} item • @{{ Math.floor(totalQty) }} pcs
                 </span>
                 <button @click="toggleEditMode"
                     :class="editMode ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-800'"
@@ -103,7 +103,7 @@
                             </button>
                             <span
                                 class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded min-w-[50px] text-center">
-                                @{{ item.jumlah }} @{{ item.satuan }}
+                                @{{ Math.floor(item.jumlah) }} @{{ item.satuan }}
                             </span>
                             <button @click.stop="tambahQty(index)"
                                 class="w-6 h-6 bg-green-100 text-green-600 rounded text-xs hover:bg-green-200 font-bold transition-all">
@@ -115,7 +115,7 @@
                             </button>
                         </div>
                         <div v-else class="text-xs font-medium text-gray-900">
-                            @{{ item.jumlah }} @{{ item.satuan }}
+                            @{{ Math.floor(item.jumlah) }} @{{ item.satuan }}
                         </div>
                     </td>
                     <td v-if="editMode" class="px-3 py-2">

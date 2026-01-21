@@ -102,7 +102,7 @@ const utils = {
 
                 transaksi.details.forEach(item => {
                     const nama = item.nama_barang.substring(0, 14);
-                    const qty = `${item.jumlah} ${item.satuan}`.padStart(6);
+                    const qty = `${Math.floor(item.jumlah)} ${item.satuan}`.padStart(6);
                     const subtotal = `Rp ${utils.formatRupiah(item.subtotal_item)}`.padStart(10);
                     receipt += `${nama.padEnd(14)} ${qty} ${subtotal}\n`;
                 });
@@ -132,9 +132,10 @@ const utils = {
                     '_blank',
                     'width=400,height=600'
                 );
+                // Biarkan autoprint di view yang menangani print()
+                // Kita hanya perlu menutup window setelah beberapa saat
                 setTimeout(() => {
                     if (printWindow && !printWindow.closed) {
-                        printWindow.print();
                         setTimeout(() => printWindow.close(), 5000);
                     }
                 }, 1000);
@@ -148,7 +149,6 @@ const utils = {
             );
             setTimeout(() => {
                 if (printWindow && !printWindow.closed) {
-                    printWindow.print();
                     setTimeout(() => printWindow.close(), 5000);
                 }
             }, 1000);
@@ -295,12 +295,7 @@ function createCoreFunctions(state, refs, utils) {
                 const barang = response.data.data;
 
                 if (parseFloat(barang.stok_sekarang) <= 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Stok Kosong!',
-                        text: `Barang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`,
-                        confirmButtonColor: '#3b82f6'
-                    });
+                    alert(`Stok Kosong!\nBarang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`);
                     state.barcode.value = '';
                     core.focusBarcode();
                     return;
@@ -313,12 +308,7 @@ function createCoreFunctions(state, refs, utils) {
                 if (existingIndex >= 0) {
                     const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
                     if (newTotal > parseFloat(barang.stok_sekarang)) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Stok Terbatas',
-                            text: `Hanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`,
-                            confirmButtonColor: '#3b82f6'
-                        });
+                        alert(`Stok Terbatas!\nHanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`);
                         state.barcode.value = '';
                         core.focusBarcode();
                         return;
@@ -438,24 +428,14 @@ function createCoreFunctions(state, refs, utils) {
         if (existingIndex >= 0) {
             const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
             if (newTotal > parseFloat(barang.stok_sekarang)) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Stok Terbatas',
-                    text: `Hanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`,
-                    confirmButtonColor: '#3b82f6'
-                });
+                alert(`Stok Terbatas!\nHanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`);
                 return;
             }
             state.cart.value[existingIndex].jumlah = newTotal;
             core.updateSubtotal(existingIndex);
         } else {
             if (parseFloat(barang.stok_sekarang) <= 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Stok Kosong!',
-                    text: `Barang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`,
-                    confirmButtonColor: '#3b82f6'
-                });
+                alert(`Stok Kosong!\nBarang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`);
                 return;
             }
             state.cart.value.push({
@@ -539,12 +519,7 @@ function createCartFunctions(state, core) {
     cart.tambahQty = (index) => {
         const item = state.cart.value[index];
         if (parseFloat(item.jumlah) + 1 > item.stok_sekarang) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Stok Terbatas',
-                text: `Hanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`,
-                confirmButtonColor: '#3b82f6'
-            });
+            alert(`Stok Terbatas!\nHanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`);
             return;
         }
         item.jumlah = parseFloat(item.jumlah) + 1;
@@ -597,12 +572,7 @@ function createEditFunctions(state, refs, core) {
                 const newQty = parseFloat(state.tempQty.value);
 
                 if (newQty > item.stok_sekarang) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Stok Terbatas',
-                        text: `Hanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`,
-                        confirmButtonColor: '#3b82f6'
-                    });
+                    alert(`Stok Terbatas!\nHanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`);
                     return;
                 }
 

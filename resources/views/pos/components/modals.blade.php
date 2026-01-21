@@ -32,7 +32,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-xs text-gray-500 mb-0.5">Stok Tersedia</div>
-                    <div class="font-bold text-blue-600 text-sm">@{{ selectedItem?.stok_sekarang }} @{{ selectedItem?.satuan }}</div>
+                    <div class="font-bold text-blue-600 text-sm">@{{ Math.floor(selectedItem?.stok_sekarang) }} @{{ selectedItem?.satuan }}</div>
                 </div>
             </div>
 
@@ -323,7 +323,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
-                                    Stok: @{{ parseInt(barang.stok_sekarang) || 0 }} @{{ barang.satuan }}
+                                    Stok: @{{ Math.floor(barang.stok_sekarang) || 0 }} @{{ barang.satuan }}
                                 </span>
                             </div>
                         </div>
