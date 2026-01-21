@@ -113,15 +113,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Harga Beli -->
                     <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Harga Beli Terakhir <span
-                                class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700">Harga Beli Terakhir</label>
                         <div class="relative">
                             <span class="absolute left-3 top-2 text-gray-500">Rp</span>
-                            <input type="text" name="harga_beli_terakhir"
-                                value="{{ old('harga_beli_terakhir', (int) $barang->harga_beli_terakhir) }}"
-                                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mask-ribuan"
-                                inputmode="numeric" required>
+                            <input type="text" value="{{ number_format($barang->harga_beli_terakhir, 0, ',', '.') }}"
+                                class="w-full pl-8 pr-3 py-2 border border-gray-200 bg-gray-100 text-gray-500 rounded-lg outline-none cursor-not-allowed"
+                                readonly>
                         </div>
+                        <p class="text-xs text-gray-400">Harga beli terakhir hanya dapat diubah melalui transaksi kulakan</p>
                     </div>
 
                     <!-- Harga Jual -->

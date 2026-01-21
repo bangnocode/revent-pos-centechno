@@ -88,14 +88,13 @@ class BarangController extends Controller
             'kategori' => 'nullable|max:50',
             'satuan_id' => 'required|exists:satuans,id',
             'nama_supplier' => 'nullable|string|max:100',
-            'harga_beli_terakhir' => 'required|numeric|min:0',
             'harga_jual_normal' => 'required|numeric|min:0',
             'stok_sekarang' => 'required|numeric',
             // Ignore unique check for current record
             'barcode' => 'nullable|max:50|unique:barang,barcode,' . $id . ',kode_barang',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('harga_beli_terakhir');
         // Set satuan field untuk backward compatibility
         $satuan = \App\Models\Satuan::find($request->satuan_id);
         $data['satuan'] = $satuan->nama_satuan;

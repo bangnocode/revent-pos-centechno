@@ -97,6 +97,12 @@ class PembelianController extends Controller
                     // 2. Create Detail
                     $subtotal = $item['jumlah'] * $item['harga_beli'];
 
+                    // 3. Validate harga beli vs harga jual
+                    $barang = Barang::findOrFail($item['kode_barang']);
+                    if ($item['harga_beli'] > $barang->harga_jual_normal) {
+                        throw new \Exception("Harga beli untuk {$barang->nama_barang} tidak boleh lebih tinggi dari harga jual. Ubah harga jual terlebih dahulu di halaman barang.");
+                    }
+
                     DetailPembelian::create([
                         'pembelian_id' => $pembelian->id,
                         'kode_barang' => $item['kode_barang'],
