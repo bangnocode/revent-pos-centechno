@@ -794,6 +794,7 @@ createApp({
             hasilPencarian: state.hasilPencarian,
             isLoadingCari: state.isLoadingCari,
             selectedSearchIndex: state.selectedSearchIndex,
+            diskonInput: state.diskonInput,
             pembayaran,
 
             // Template refs
