@@ -788,20 +788,32 @@ createApp({
         // Return all necessary values
         return {
             // State
-            ...Object.fromEntries(Object.entries(state).map(([key, value]) => [key, value])),
+            barcode: state.barcode,
+            cart: state.cart,
+            editMode: state.editMode,
+            editSelectedIndex: state.editSelectedIndex,
+            editQtyMode: state.editQtyMode,
+            showModal: state.showModal,
+            isProcessing: state.isProcessing,
+            tempQty: state.tempQty,
+            lastTransaction: state.lastTransaction,
             showModalCari: state.showModalCari,
             keywordCari: state.keywordCari,
             hasilPencarian: state.hasilPencarian,
             isLoadingCari: state.isLoadingCari,
             selectedSearchIndex: state.selectedSearchIndex,
+            diskonTransaksi: state.diskonTransaksi,
             diskonInput: state.diskonInput,
             pembayaran,
 
             // Template refs
-            ...Object.fromEntries(Object.entries(refs).map(([key, value]) => [key, value])),
+            barcodeInput: refs.barcodeInput,
+            uangDibayarInput: refs.uangDibayarInput,
+            qtyModalInput: refs.qtyModalInput,
             searchInput: refs.searchInput,
 
             // Computed
+            ...Object.fromEntries(Object.entries(computedValues).map(([key, value]) => [key, value])),
             ...Object.fromEntries(Object.entries(computedValues).map(([key, value]) => [key, value])),
 
             // Methods

@@ -854,8 +854,8 @@
         </div>
     </div>
 
-    <!-- Vue 3 CDN -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vue 3 Production CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <!-- Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
