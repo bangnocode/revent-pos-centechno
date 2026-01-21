@@ -29,6 +29,8 @@ export function createPaymentFunctions(state, pembayaran, computedValues, utils,
             if (state.isProcessing.value) return;
 
             state.showModal.value = false;
+            pembayaran.value.nama_pelanggan = 'Pelanggan Umum';
+            pembayaran.value.metode_pembayaran = 'tunai';
             pembayaran.value.uang_dibayar = 0;
             core.focusBarcode();
         },
@@ -80,9 +82,19 @@ export function createPaymentFunctions(state, pembayaran, computedValues, utils,
 
                 if (response.data.success) {
                     state.lastTransaction.value = response.data.nomor_faktur;
+
+                    // Reset semua state sebelum menutup modal
                     state.cart.value = [];
-                    state.showModal.value = false;
                     state.diskonTransaksi.value = 0;
+                    state.diskonInput.value = '0';
+                    state.diskonMode.value = 'nominal';
+
+                    // Reset form pembayaran
+                    pembayaran.value.nama_pelanggan = 'Pelanggan Umum';
+                    pembayaran.value.metode_pembayaran = 'tunai';
+                    pembayaran.value.uang_dibayar = 0;
+
+                    state.showModal.value = false;
 
                     await utils.printThermalReceipt(response.data.nomor_faktur);
                     core.focusBarcode();

@@ -65,6 +65,14 @@ const utils = {
         return value ? parseInt(value) : 0;
     },
 
+    handleUangDibayarInput: (e, pembayaran) => {
+        let value = e.target.value.replace(/[^\d]/g, '');
+        let num = parseInt(value) || 0;
+        pembayaran.uang_dibayar = num;
+        // Format display dengan titik ribuan
+        e.target.value = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    },
+
     printThermalReceipt: async (nomorFaktur) => {
         try {
             const response = await axios.get(`/pos/print-invoice-data/${nomorFaktur}`);
@@ -196,7 +204,42 @@ function createComputedValues(state, pembayaran) {
 
     computedValues.kembalian = computed(() => {
         const bayar = parseFloat(pembayaran.value.uang_dibayar) || 0;
-        return bayar - computedValues.total.value;
+        const total = computedValues.total.value;
+        return bayar - total;
+    });
+
+    computedValues.uangDibayarFormatted = computed({
+        get: () => {
+            const num = parseFloat(pembayaran.value.uang_dibayar) || 0;
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        set: (value) => {
+            const num = parseInt(value.replace(/[^\d]/g, '')) || 0;
+            pembayaran.value.uang_dibayar = num;
+        }
+    });
+
+    computedValues.diskonInputFormatted = computed({
+        get: () => {
+            const num = parseFloat(state.diskonTransaksi.value) || 0;
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        set: (value) => {
+            const num = parseInt(value.replace(/[^\d]/g, '')) || 0;
+            let finalValue = num;
+
+            // Validasi maksimal
+            if (state.diskonMode.value === 'persen') {
+                if (finalValue > 100) finalValue = 100;
+            } else {
+                // Mode nominal - maksimal subtotalSetelahDiskonItem
+                const maxDiskon = computedValues.subtotalSetelahDiskonItem.value;
+                if (finalValue > maxDiskon) finalValue = maxDiskon;
+            }
+
+            state.diskonTransaksi.value = finalValue;
+            state.diskonInput.value = finalValue.toString();
+        }
     });
 
     computedValues.currentDate = computed(() => new Date().toLocaleDateString('id-ID'));
@@ -477,8 +520,17 @@ function createCoreFunctions(state, refs, utils) {
         core.focusBarcode();
     };
 
+    core.toggleDiskonMode = () => {
+        state.diskonMode.value = state.diskonMode.value === 'nominal' ? 'persen' : 'nominal';
+        // Reset diskon ke 0
+        state.diskonTransaksi.value = 0;
+        state.diskonInput.value = '0';
+    };
+
     return core;
 }
+
+// POS Payment Functions
 
 // POS Cart Functions
 function createCartFunctions(state, core) {
@@ -616,6 +668,9 @@ function createPaymentFunctions(state, pembayaran, computedValues, utils, core, 
             if (state.isProcessing.value) return;
 
             state.showModal.value = false;
+            // Reset ke default saat modal ditutup
+            pembayaran.value.nama_pelanggan = 'Pelanggan Umum';
+            pembayaran.value.metode_pembayaran = 'tunai';
             pembayaran.value.uang_dibayar = 0;
             core.focusBarcode();
         },
@@ -664,9 +719,19 @@ function createPaymentFunctions(state, pembayaran, computedValues, utils, core, 
 
                 if (response.data.success) {
                     state.lastTransaction.value = response.data.nomor_faktur;
+
+                    // Reset cart dan diskon
                     state.cart.value = [];
-                    state.showModal.value = false;
                     state.diskonTransaksi.value = 0;
+                    state.diskonInput.value = '0';
+                    state.diskonMode.value = 'nominal';
+
+                    // Reset data pembeli dan pembayaran ke default
+                    pembayaran.value.nama_pelanggan = 'Pelanggan Umum';
+                    pembayaran.value.metode_pembayaran = 'tunai';
+                    pembayaran.value.uang_dibayar = 0;
+
+                    state.showModal.value = false;
 
                     await utils.printThermalReceipt(response.data.nomor_faktur);
                     core.focusBarcode();
@@ -908,7 +973,6 @@ createApp({
             tambahBarangDariPencarian: core.tambahBarangDariPencarian,
             tutupModalCari: core.tutupModalCari,
             setDiskonItem: core.setDiskonItem,
-            handleDiskonInput: (event) => core.handleDiskonInput(event, computedValues),
             toggleDiskonMode: core.toggleDiskonMode,
         };
     }

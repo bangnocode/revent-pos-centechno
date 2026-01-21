@@ -140,7 +140,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-500">@{{ diskonMode === 'nominal' ? 'Rp' : '%' }}</span>
                     </div>
-                    <input :value="diskonInput" @input="handleDiskonInput" type="text"
+                    <input v-model="diskonInputFormatted" type="text"
                         class="w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded text-right"
                         placeholder="0" :disabled="isProcessing" maxlength="15">
                 </div>
@@ -161,8 +161,8 @@
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1 flex gap-1">Uang Dibayar <span class="hidden lg:flex">(Enter untuk
                     proses)</span></label>
-                <input :value="formatRupiah(pembayaran.uang_dibayar)" @input="formatUangDibayar"
-                    @keydown.enter.prevent="!isProcessing && prosesPembayaran()" type="text" maxlength="12"
+                <input v-model="uangDibayarFormatted"
+                    @keydown.enter.prevent="!isProcessing && prosesPembayaran()" type="text" maxlength="15"
                     class="w-full px-3 py-2 border border-gray-300 rounded text-right text-lg font-semibold focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none"
                     placeholder="0" :disabled="isProcessing" ref="uangDibayarInput" inputmode="numeric" />
                 <p class="text-xs text-gray-500 mt-0.5 hidden lg:flex gap-1 items-center">

@@ -14,11 +14,14 @@ export const utils = {
     },
 
     /**
-     * Format input uang dibayar
+     * Handle input uang dibayar dengan format ribuan
      */
-    formatUangDibayar: (e) => {
+    handleUangDibayarInput: (e, pembayaran) => {
         let value = e.target.value.replace(/[^\d]/g, '');
-        return value ? parseInt(value) : 0;
+        let num = parseInt(value) || 0;
+        pembayaran.uang_dibayar = num;
+        // Format display dengan titik ribuan
+        e.target.value = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     },
 
     /**

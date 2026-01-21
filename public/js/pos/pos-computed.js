@@ -50,7 +50,19 @@ export function createComputedValues(state, pembayaran) {
 
     computedValues.kembalian = computed(() => {
         const bayar = parseFloat(pembayaran.value.uang_dibayar) || 0;
-        return bayar - computedValues.total.value;
+        const total = computedValues.total.value;
+        return bayar - total;
+    });
+
+    computedValues.uangDibayarFormatted = computed({
+        get: () => {
+            const num = parseFloat(pembayaran.value.uang_dibayar) || 0;
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        set: (value) => {
+            const num = parseInt(value.replace(/[^\d]/g, '')) || 0;
+            pembayaran.value.uang_dibayar = num;
+        }
     });
 
     computedValues.currentDate = computed(() => new Date().toLocaleDateString('id-ID'));
