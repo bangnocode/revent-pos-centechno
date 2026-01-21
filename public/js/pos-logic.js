@@ -28,6 +28,7 @@ createApp({
             selectedSearchIndex: ref(-1),
             diskonTransaksi: ref(0),
             diskonInput: ref('0'),
+            diskonMode: ref('nominal'), // 'nominal' atau 'persen'
         };
 
         // Template Refs
@@ -66,11 +67,23 @@ createApp({
 
             total: computed(() => {
                 const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
-                const diskonGlobal = parseFloat(state.diskonTransaksi.value) || 0;
-                return subtotalSetelahItem - diskonGlobal;
+                let diskonGlobal = parseFloat(state.diskonTransaksi.value) || 0;
+                
+                if (state.diskonMode.value === 'persen') {
+                    diskonGlobal = (diskonGlobal / 100) * subtotalSetelahItem;
+                }
+                
+                return Math.max(0, subtotalSetelahItem - diskonGlobal);
             }),
 
             totalDiskon: computed(() => {
+                const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
+                let diskonGlobal = parseFloat(state.diskonTransaksi.value) || 0;
+                
+                if (state.diskonMode.value === 'persen') {
+                    diskonGlobal = (diskonGlobal / 100) * subtotalSetelahItem;
+                }
+                
                 return computedValues.subtotal.value - computedValues.total.value;
             }),
 
@@ -241,11 +254,22 @@ createApp({
 
                 try {
                     const response = await axios.post('/pos/cari-barang', {
-                        keyword: state.barcode.value
+                        keyword: state.barcode.value.trim()
                     });
+
+                    console.log('Response:', response.data); // Debug
 
                     if (response.data.success) {
                         const barang = response.data.data;
+                        console.log('Barang ditemukan:', barang); // Debug
+
+                        if (parseFloat(barang.stok_sekarang) < 1) {
+                            alert(`Stok ${barang.nama_barang} habis! (Stok: ${barang.stok_sekarang})`);
+                            state.barcode.value = '';
+                            core.focusBarcode();
+                            return;
+                        }
+
                         const existingIndex = state.cart.value.findIndex(
                             item => item.kode_barang === barang.kode_barang
                         );
@@ -261,12 +285,6 @@ createApp({
                             state.cart.value[existingIndex].jumlah = newTotal;
                             core.updateSubtotal(existingIndex);
                         } else {
-                            if (parseFloat(barang.stok_sekarang) < 1) {
-                                alert(`Stok ${barang.nama_barang} habis!`);
-                                state.barcode.value = '';
-                                core.focusBarcode();
-                                return;
-                            }
                             state.cart.value.push({
                                 kode_barang: barang.kode_barang,
                                 barcode: barang.barcode,
@@ -282,13 +300,13 @@ createApp({
                         state.barcode.value = '';
                         core.focusBarcode();
                     } else {
-                        alert(`Barang tidak ditemukan / stok barang habis: ${state.barcode.value}`);
+                        alert(`Barang tidak ditemukan: ${state.barcode.value} - ${response.data.message || 'Unknown error'}`);
                         state.barcode.value = '';
                         core.focusBarcode();
                     }
                 } catch (error) {
                     console.error('Error mencari barang:', error);
-                    alert('Terjadi kesalahan saat mencari barang');
+                    alert('Terjadi kesalahan saat mencari barang: ' + error.message);
                     state.barcode.value = '';
                     core.focusBarcode();
                 }
@@ -313,12 +331,28 @@ createApp({
                 value = value.replace(/[^\d]/g, ''); // Remove non-digits for parsing
                 let numericValue = value;
                 let diskon = Math.max(0, parseInt(numericValue) || 0);
-                const maxDiskon = computedValues.subtotalSetelahDiskonItem.value;
-                state.diskonTransaksi.value = Math.min(diskon, maxDiskon);
+                
+                const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
+                
+                if (state.diskonMode.value === 'persen') {
+                    // Limit persen maksimal 100%
+                    diskon = Math.min(diskon, 100);
+                } else {
+                    // Limit nominal tidak lebih dari subtotal
+                    diskon = Math.min(diskon, subtotalSetelahItem);
+                }
+                
+                state.diskonTransaksi.value = diskon;
                 // Format the input value
-                let formatted = utils.formatRupiah(state.diskonTransaksi.value);
+                let formatted = state.diskonMode.value === 'persen' ? diskon + '%' : utils.formatRupiah(diskon);
                 event.target.value = formatted;
                 state.diskonInput.value = formatted;
+            },
+
+            toggleDiskonMode: () => {
+                state.diskonMode.value = state.diskonMode.value === 'nominal' ? 'persen' : 'nominal';
+                state.diskonTransaksi.value = 0;
+                state.diskonInput.value = state.diskonMode.value === 'persen' ? '0%' : '0';
             },
 
             cariBarangManual: async () => {
@@ -590,7 +624,13 @@ createApp({
                         metode_pembayaran: pembayaran.value.metode_pembayaran,
                         total_bayar: parseFloat(pembayaran.value.uang_dibayar),
                         subtotal: parseFloat(computedValues.subtotal.value), // Subtotal sebelum diskon
-                        diskon_transaksi: parseFloat(state.diskonTransaksi.value || 0), // Diskon global
+                        diskon_transaksi: (() => {
+                            let diskon = parseFloat(state.diskonTransaksi.value || 0);
+                            if (state.diskonMode.value === 'persen') {
+                                diskon = (diskon / 100) * computedValues.subtotalSetelahDiskonItem.value;
+                            }
+                            return diskon;
+                        })(), // Diskon global dalam nominal
                         total_transaksi: parseFloat(computedValues.total.value), // Total setelah semua diskon
                     };
 
@@ -804,6 +844,7 @@ createApp({
             selectedSearchIndex: state.selectedSearchIndex,
             diskonTransaksi: state.diskonTransaksi,
             diskonInput: state.diskonInput,
+            diskonMode: state.diskonMode,
             pembayaran,
 
             // Template refs
@@ -813,7 +854,6 @@ createApp({
             searchInput: refs.searchInput,
 
             // Computed
-            ...Object.fromEntries(Object.entries(computedValues).map(([key, value]) => [key, value])),
             ...Object.fromEntries(Object.entries(computedValues).map(([key, value]) => [key, value])),
 
             // Methods
@@ -842,6 +882,7 @@ createApp({
             tutupModalCari: core.tutupModalCari,
             setDiskonItem: core.setDiskonItem,
             handleDiskonInput: core.handleDiskonInput,
+            toggleDiskonMode: core.toggleDiskonMode,
         };
     }
 }).mount('#app');

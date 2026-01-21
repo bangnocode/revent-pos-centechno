@@ -606,17 +606,23 @@
 
                     <!-- Di modal pembayaran, sebelum total transaksi -->
                     <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Diskon Transaksi (Global)</label>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-medium text-gray-700">Diskon Transaksi (Global)</label>
+                            <button @click="toggleDiskonMode" type="button" 
+                                class="text-xs px-2 py-1 rounded border @{{ diskonMode === 'nominal' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-green-100 border-green-300 text-green-700' }}">
+                                @{{ diskonMode === 'nominal' ? 'Rp' : '%' }}
+                            </button>
+                        </div>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500">Rp</span>
+                                <span class="text-gray-500">@{{ diskonMode === 'nominal' ? 'Rp' : '%' }}</span>
                             </div>
                             <input :value="diskonInput" @input="handleDiskonInput" type="text"
                                 class="w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded text-right"
                                 placeholder="0" :disabled="isProcessing" maxlength="15">
                         </div>
                         <p class="text-xs text-gray-500 mt-1">
-                            Maks: Rp @{{ formatRupiah(subtotalSetelahDiskonItem) }}
+                            @{{ diskonMode === 'nominal' ? 'Maks: Rp ' + formatRupiah(subtotalSetelahDiskonItem) : 'Maks: 100%' }}
                         </p>
                     </div>
 

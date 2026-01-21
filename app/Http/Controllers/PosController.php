@@ -51,28 +51,42 @@ class PosController extends Controller
      */
     public function cariBarang(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $keyword = trim($request->input('keyword'));
+        $mode = $request->input('mode', 'scan'); // 'scan' atau 'manual'
 
-        $barang = Barang::where('status_aktif', true)
-            ->where(function ($query) use ($keyword) {
-                $query->where('barcode', $keyword)
-                    ->orWhere('kode_barang', $keyword)
-                    ->orWhere('nama_barang', 'like', "%$keyword%");
+        \Log::info('Cari barang', ['keyword' => $keyword, 'mode' => $mode]); // Debug log
+
+        if ($mode === 'scan') {
+            // Untuk scan barcode, cari exact match atau like
+            $barang = Barang::where(function ($query) use ($keyword) {
+                $query->where('barcode', 'like', "%$keyword%")
+                    ->orWhere('kode_barang', 'like', "%$keyword%");
             })
             ->first();
 
-        if ($barang) {
-            if ($barang->stok_sekarang >= 1) {
+            \Log::info('Hasil scan', ['barang' => $barang ? $barang->toArray() : null]); // Debug
+
+            if ($barang) {
                 return response()->json([
                     'success' => true,
                     'data' => $barang
                 ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stok barang habis'
-                ]);
             }
+        } else {
+            // Untuk manual search, cari berdasarkan nama atau kode
+            $barang = Barang::where(function ($query) use ($keyword) {
+                $query->where('nama_barang', 'like', "%$keyword%")
+                    ->orWhere('kode_barang', 'like', "%$keyword%")
+                    ->orWhere('barcode', 'like', "%$keyword%");
+            })
+            ->get();
+
+            \Log::info('Hasil manual', ['count' => $barang->count()]); // Debug
+
+            return response()->json([
+                'success' => true,
+                'data' => $barang
+            ]);
         }
 
         return response()->json([

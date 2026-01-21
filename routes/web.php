@@ -19,10 +19,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // POS Routes
 Route::middleware(['guest.or.auth'])->group(function () {
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
-    Route::post('/pos/cari-barang', [PosController::class, 'cariBarang'])->name('pos.cari-barang');
     Route::post('/pos/simpan-transaksi', [PosController::class, 'simpanTransaksi'])->name('pos.simpan-transaksi');
     Route::get('/pos/print-invoice/{faktur}', [PosController::class, 'printInvoice']);
     Route::get('/pos/print-invoice-data/{faktur}', [PosController::class, 'printInvoiceData']);
+});
+
+// Route untuk cari barang tanpa auth
+Route::post('/pos/cari-barang', [PosController::class, 'cariBarang'])->name('pos.cari-barang');
+
+// Route test
+Route::get('/test-barang', function () {
+    $barang = \App\Models\Barang::first();
+    return response()->json($barang);
 });
 
 // Admin Routes
