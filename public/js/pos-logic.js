@@ -282,7 +282,7 @@ createApp({
                         state.barcode.value = '';
                         core.focusBarcode();
                     } else {
-                        alert(`Barang tidak ditemukan: ${state.barcode.value}`);
+                        alert(`Barang tidak ditemukan / stok barang habis: ${state.barcode.value}`);
                         state.barcode.value = '';
                         core.focusBarcode();
                     }

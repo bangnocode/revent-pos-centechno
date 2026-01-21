@@ -62,10 +62,17 @@ class PosController extends Controller
             ->first();
 
         if ($barang) {
-            return response()->json([
-                'success' => true,
-                'data' => $barang
-            ]);
+            if ($barang->stok_sekarang >= 1) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $barang
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stok barang habis'
+                ]);
+            }
         }
 
         return response()->json([
