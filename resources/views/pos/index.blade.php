@@ -11,6 +11,9 @@
     <!-- Heroicons CDN -->
     <script src="https://unpkg.com/@heroicons/vue@2.0.0/outline/index.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Thermal Printer Library -->
     <script src="https://cdn.jsdelivr.net/npm/escpos@3.0.0-alpha.6/dist/escpos.min.js"></script>
 
@@ -320,14 +323,12 @@
                                                     class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                                                     <span class="text-gray-500 text-xs">Rp</span>
                                                 </div>
-                                                <input :value="item.diskon_item" type="number"
-                                                    min="0" step="100"
+                                                <input :value="formatRupiah(item.diskon_item)" type="text"
                                                     @input="setDiskonItem(index, $event.target.value)"
-                                                    :max="item.harga_satuan * item.jumlah"
-                                                    class="w-24 pl-6 pr-2 py-1 border border-gray-300 rounded text-xs text-right">
+                                                    class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded text-xs text-right font-medium focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none">
                                             </div>
-                                            <p class="text-xs text-gray-400 mt-0.5">
-                                                Maks: Rp @{{ formatRupiah   (item.harga_satuan * item.jumlah) }}
+                                            <p class="text-[10px] text-gray-400 mt-0.5 whitespace-nowrap">
+                                                Maks: Rp @{{ formatRupiah(item.harga_satuan * item.jumlah) }}
                                             </p>
                                         </td>
                                         <td class="px-3 py-2 text-xs font-bold text-gray-900">
@@ -764,45 +765,58 @@
                         <div v-for="(barang, index) in hasilPencarian" :key="barang.kode_barang"
                             :data-search-index="index"
                             :class="{
-                                'border border-blue-500 bg-blue-50': selectedSearchIndex === index,
-                                'border border-gray-200 hover:bg-gray-50': selectedSearchIndex !== index
+                                'border-blue-500 bg-blue-50 shadow-sm': selectedSearchIndex === index && parseFloat(barang.stok_sekarang) > 0,
+                                'border-gray-200 hover:bg-white': selectedSearchIndex !== index && parseFloat(barang.stok_sekarang) > 0,
+                                'opacity-75 bg-red-50 border-red-200': parseFloat(barang.stok_sekarang) <= 0,
+                                'border-red-500 bg-red-100': selectedSearchIndex === index && parseFloat(barang.stok_sekarang) <= 0
                             }"
-                            class="rounded-lg p-3 cursor-pointer transition-all"
+                            class="rounded-lg p-3 border cursor-pointer transition-all relative overflow-hidden"
                             @click="tambahBarangDariPencarian(barang)" @mouseenter="selectedSearchIndex = index">
-                            <div class="flex justify-between items-start">
+                            <!-- Out of Stock Overlay Text -->
+                            <div v-if="parseFloat(barang.stok_sekarang) <= 0" class="absolute top-0 right-0 bg-red-600 text-white text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider transform translate-x-[20%] translate-y-[50%] rotate-45 w-[100px] text-center shadow-sm">
+                                Habis
+                            </div>
+
+                            <div class="flex justify-between items-start relative z-10">
                                 <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 text-sm">@{{ barang.nama_barang }}</h3>
-                                    <div class="flex gap-2 mt-1 text-xs text-gray-600">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                    <h3 class="font-bold text-gray-900 text-sm">@{{ barang.nama_barang }}</h3>
+                                    <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-600">
+                                        <span class="flex items-center gap-1 font-mono">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                                             </svg>
                                             @{{ barang.kode_barang }}
                                         </span>
-                                        <span v-if="barang.barcode" class="text-gray-500">| Barcode:
-                                            @{{ barang.barcode }}</span>
+                                        <span v-if="barang.barcode" class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                            </svg>
+                                            @{{ barang.barcode }}
+                                        </span>
                                     </div>
-                                    <div class="mt-1">
+                                    <div class="mt-2 flex items-center gap-2">
                                         <span
-                                            class="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                            :class="parseFloat(barang.stok_sekarang) <= 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border border-current border-opacity-20">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                             </svg>
                                             Stok: @{{ parseInt(barang.stok_sekarang) || 0 }} @{{ barang.satuan }}
                                         </span>
                                     </div>
                                 </div>
-                                <div class="text-right ml-3">
-                                    <div class="text-lg font-bold text-blue-600">
+                                <div class="text-right ml-3 flex flex-col items-end">
+                                    <div class="text-lg font-black text-blue-700">
                                         Rp @{{ formatRupiah(barang.harga_jual_normal) }}
                                     </div>
                                     <button
-                                        class="mt-1.5 px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors">
-                                        Tambah
+                                        :disabled="parseFloat(barang.stok_sekarang) <= 0"
+                                        :class="parseFloat(barang.stok_sekarang) <= 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'"
+                                        class="mt-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1">
+                                        <svg v-if="parseFloat(barang.stok_sekarang) > 0" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        @{{ parseFloat(barang.stok_sekarang) <= 0 ? 'STOK HABIS' : 'TAMBAH' }}
                                     </button>
                                 </div>
                             </div>

@@ -68,22 +68,22 @@ createApp({
             total: computed(() => {
                 const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
                 let diskonGlobal = parseFloat(state.diskonTransaksi.value) || 0;
-                
+
                 if (state.diskonMode.value === 'persen') {
                     diskonGlobal = (diskonGlobal / 100) * subtotalSetelahItem;
                 }
-                
+
                 return Math.max(0, subtotalSetelahItem - diskonGlobal);
             }),
 
             totalDiskon: computed(() => {
                 const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
                 let diskonGlobal = parseFloat(state.diskonTransaksi.value) || 0;
-                
+
                 if (state.diskonMode.value === 'persen') {
                     diskonGlobal = (diskonGlobal / 100) * subtotalSetelahItem;
                 }
-                
+
                 return computedValues.subtotal.value - computedValues.total.value;
             }),
 
@@ -213,8 +213,10 @@ createApp({
 
             setDiskonItem: (index, value) => {
                 const item = state.cart.value[index];
-                // Parse value and ensure it is a valid non-negative integer
-                let diskon = Math.max(0, parseInt(value) || 0);
+                // Ambil angka saja dari string berformat (misal: 1.000 -> 1000)
+                let numericStr = value.replace(/[^\d]/g, '');
+                let diskon = Math.max(0, parseInt(numericStr) || 0);
+
                 const maxDiskon = item.harga_satuan * item.jumlah;
 
                 // Limit diskon tidak lebih dari harga total item (harga * qty)
@@ -257,14 +259,17 @@ createApp({
                         keyword: state.barcode.value.trim()
                     });
 
-                    console.log('Response:', response.data); // Debug
-
                     if (response.data.success) {
                         const barang = response.data.data;
-                        console.log('Barang ditemukan:', barang); // Debug
 
-                        if (parseFloat(barang.stok_sekarang) < 1) {
-                            alert(`Stok ${barang.nama_barang} habis! (Stok: ${barang.stok_sekarang})`);
+                        // STOK 0 ERROR
+                        if (parseFloat(barang.stok_sekarang) <= 0) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Stok Kosong!',
+                                text: `Barang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`,
+                                confirmButtonColor: '#3b82f6'
+                            });
                             state.barcode.value = '';
                             core.focusBarcode();
                             return;
@@ -277,7 +282,12 @@ createApp({
                         if (existingIndex >= 0) {
                             const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
                             if (newTotal > parseFloat(barang.stok_sekarang)) {
-                                alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Stok Terbatas',
+                                    text: `Hanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`,
+                                    confirmButtonColor: '#3b82f6'
+                                });
                                 state.barcode.value = '';
                                 core.focusBarcode();
                                 return;
@@ -293,6 +303,7 @@ createApp({
                                 jumlah: 1,
                                 satuan: barang.satuan,
                                 stok_sekarang: barang.stok_sekarang,
+                                diskon_item: 0,
                                 subtotal: parseFloat(barang.harga_jual_normal)
                             });
                         }
@@ -327,32 +338,42 @@ createApp({
 
             handleDiskonInput: (event) => {
                 let value = event.target.value;
-                // Allow only numbers and dots, but we'll format
-                value = value.replace(/[^\d]/g, ''); // Remove non-digits for parsing
-                let numericValue = value;
-                let diskon = Math.max(0, parseInt(numericValue) || 0);
-                
+                // Ambil angka saja
+                let numericStr = value.replace(/[^\d]/g, '');
+                let numericValue = parseInt(numericStr) || 0;
+
                 const subtotalSetelahItem = computedValues.subtotalSetelahDiskonItem.value;
-                
+
                 if (state.diskonMode.value === 'persen') {
                     // Limit persen maksimal 100%
-                    diskon = Math.min(diskon, 100);
+                    if (numericValue > 100) numericValue = 100;
+                    state.diskonTransaksi.value = numericValue;
+                    state.diskonInput.value = numericValue + '%';
                 } else {
                     // Limit nominal tidak lebih dari subtotal
-                    diskon = Math.min(diskon, subtotalSetelahItem);
+                    if (numericValue > subtotalSetelahItem) numericValue = subtotalSetelahItem;
+                    state.diskonTransaksi.value = numericValue;
+                    state.diskonInput.value = utils.formatRupiah(numericValue);
                 }
-                
-                state.diskonTransaksi.value = diskon;
-                // Format the input value
-                let formatted = state.diskonMode.value === 'persen' ? diskon + '%' : utils.formatRupiah(diskon);
-                event.target.value = formatted;
-                state.diskonInput.value = formatted;
+
+                // Update input display specifically to handle cursor
+                event.target.value = state.diskonInput.value;
             },
 
             toggleDiskonMode: () => {
                 state.diskonMode.value = state.diskonMode.value === 'nominal' ? 'persen' : 'nominal';
                 state.diskonTransaksi.value = 0;
                 state.diskonInput.value = state.diskonMode.value === 'persen' ? '0%' : '0';
+
+                // Fokus kembali ke input setelah toggle agar user bisa langsung ngetik
+                nextTick(() => {
+                    // Cari input diskon di DOM
+                    const inputDiskon = document.querySelector('input[placeholder="0"][maxlength="15"]');
+                    if (inputDiskon) {
+                        inputDiskon.focus();
+                        inputDiskon.select();
+                    }
+                });
             },
 
             cariBarangManual: async () => {
@@ -393,14 +414,24 @@ createApp({
                 if (existingIndex >= 0) {
                     const newTotal = parseFloat(state.cart.value[existingIndex].jumlah) + 1;
                     if (newTotal > parseFloat(barang.stok_sekarang)) {
-                        alert(`Stok tidak cukup untuk ${barang.nama_barang}! (Tersedia: ${barang.stok_sekarang})`);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Stok Terbatas',
+                            text: `Hanya tersedia ${barang.stok_sekarang} unit untuk ${barang.nama_barang}.`,
+                            confirmButtonColor: '#3b82f6'
+                        });
                         return;
                     }
                     state.cart.value[existingIndex].jumlah = newTotal;
                     core.updateSubtotal(existingIndex);
                 } else {
-                    if (parseFloat(barang.stok_sekarang) < 1) {
-                        alert(`Stok ${barang.nama_barang} habis!`);
+                    if (parseFloat(barang.stok_sekarang) <= 0) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Stok Kosong!',
+                            text: `Barang "${barang.nama_barang}" tidak dapat ditambahkan karena stoknya 0.`,
+                            confirmButtonColor: '#3b82f6'
+                        });
                         return;
                     }
                     state.cart.value.push({
@@ -411,6 +442,7 @@ createApp({
                         jumlah: 1,
                         satuan: barang.satuan,
                         stok_sekarang: barang.stok_sekarang,
+                        diskon_item: 0,
                         subtotal: parseFloat(barang.harga_jual_normal)
                     });
                 }
@@ -477,7 +509,12 @@ createApp({
             tambahQty: (index) => {
                 const item = state.cart.value[index];
                 if (parseFloat(item.jumlah) + 1 > item.stok_sekarang) {
-                    alert(`Stok tidak cukup! (Tersedia: ${item.stok_sekarang})`);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stok Terbatas',
+                        text: `Hanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`,
+                        confirmButtonColor: '#3b82f6'
+                    });
                     return;
                 }
                 item.jumlah = parseFloat(item.jumlah) + 1;
@@ -527,7 +564,12 @@ createApp({
                     const newQty = parseFloat(state.tempQty.value);
 
                     if (newQty > item.stok_sekarang) {
-                        // Let UI handle the error state but block application here too
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Stok Terbatas',
+                            text: `Hanya tersedia ${item.stok_sekarang} unit untuk ${item.nama_barang}.`,
+                            confirmButtonColor: '#3b82f6'
+                        });
                         return;
                     }
 

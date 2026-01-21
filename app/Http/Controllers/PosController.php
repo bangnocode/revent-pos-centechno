@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PosController extends Controller
 {
@@ -54,7 +55,7 @@ class PosController extends Controller
         $keyword = trim($request->input('keyword'));
         $mode = $request->input('mode', 'scan'); // 'scan' atau 'manual'
 
-        \Log::info('Cari barang', ['keyword' => $keyword, 'mode' => $mode]); // Debug log
+        Log::info('Cari barang', ['keyword' => $keyword, 'mode' => $mode]); // Debug log
 
         if ($mode === 'scan') {
             // Untuk scan barcode, cari exact match atau like
@@ -62,9 +63,9 @@ class PosController extends Controller
                 $query->where('barcode', 'like', "%$keyword%")
                     ->orWhere('kode_barang', 'like', "%$keyword%");
             })
-            ->first();
+                ->first();
 
-            \Log::info('Hasil scan', ['barang' => $barang ? $barang->toArray() : null]); // Debug
+            Log::info('Hasil scan', ['barang' => $barang ? $barang->toArray() : null]); // Debug
 
             if ($barang) {
                 return response()->json([
@@ -79,9 +80,9 @@ class PosController extends Controller
                     ->orWhere('kode_barang', 'like', "%$keyword%")
                     ->orWhere('barcode', 'like', "%$keyword%");
             })
-            ->get();
+                ->get();
 
-            \Log::info('Hasil manual', ['count' => $barang->count()]); // Debug
+            Log::info('Hasil manual', ['count' => $barang->count()]); // Debug
 
             return response()->json([
                 'success' => true,
@@ -166,7 +167,7 @@ class PosController extends Controller
                 'total_bayar' => $request->total_bayar,
                 'kembalian' => $kembalian,
                 'metode_pembayaran' => $request->metode_pembayaran,
-                'id_operator' => auth()->user()->username ?? 'admin', // Default for development
+                'id_operator' => Auth::user()->username ?? 'admin', // Default for development
                 'status_pembayaran' => $statusPembayaran,
             ]);
 
@@ -226,7 +227,7 @@ class PosController extends Controller
                         'stok_sebelum' => $stokSebelum,
                         'stok_sesudah' => $stokSesudah,
                         'nomor_referensi' => $nomorFaktur,
-                        'id_operator' => auth()->user()->username ?? 'admin',
+                        'id_operator' => Auth::user()->username ?? 'admin',
                         'keterangan' => 'Penjualan POS',
                     ]);
                 } else {
