@@ -84,7 +84,7 @@ export function createPaymentFunctions(state, pembayaran, computedValues, utils,
                     state.showModal.value = false;
                     state.diskonTransaksi.value = 0;
 
-                    await utils.printThermalReceipt(response.data.nomor_faktur);
+                    utils.printThermalReceipt(response.data.nomor_faktur);
                     core.focusBarcode();
                 }
             } catch (error) {

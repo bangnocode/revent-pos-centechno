@@ -160,6 +160,16 @@
             @if (request()->has('autoprint'))
                 setTimeout(function() {
                     window.print();
+                    
+                    // onafterprint will fire after the print dialog is closed (printed or cancelled)
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+
+                    // Fallback for browsers that might not support onafterprint properly
+                    setTimeout(function() {
+                        window.close();
+                    }, 2000);
                 }, 500);
             @endif
         };

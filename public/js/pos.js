@@ -73,86 +73,13 @@ const utils = {
         e.target.value = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     },
 
-    printThermalReceipt: async (nomorFaktur) => {
-        try {
-            const response = await axios.get(`/pos/print-invoice-data/${nomorFaktur}`);
-            const transaksi = response.data;
-
-            if ('serial' in navigator) {
-                const port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 9600 });
-
-                const writer = port.writable.getWriter();
-                const encoder = new TextEncoder();
-
-                let receipt = '\x1B\x40';
-                receipt += '\x1B\x61\x01';
-                receipt += 'TOKO CT\n';
-                receipt += 'Jl. Contoh No. 123\n';
-                receipt += 'Telp: 0812-3456-7890\n';
-                receipt += '\n';
-                receipt += `FAKTUR: ${transaksi.nomor_faktur}\n`;
-                receipt += `Tanggal: ${new Date(transaksi.tanggal_transaksi).toLocaleString('id-ID')}\n`;
-                receipt += `Kasir: ${transaksi.id_operator}\n`;
-                receipt += `Pelanggan: ${transaksi.nama_pelanggan}\n`;
-                receipt += '\x1B\x61\x00';
-                receipt += '================================\n';
-                receipt += 'Barang          Qty    Subtotal\n';
-                receipt += '================================\n';
-
-                transaksi.details.forEach(item => {
-                    const nama = item.nama_barang.substring(0, 14);
-                    const qty = `${Math.floor(item.jumlah)} ${item.satuan}`.padStart(6);
-                    const subtotal = `Rp ${utils.formatRupiah(item.subtotal_item)}`.padStart(10);
-                    receipt += `${nama.padEnd(14)} ${qty} ${subtotal}\n`;
-                });
-
-                receipt += '================================\n';
-                receipt += `Subtotal: Rp ${utils.formatRupiah(transaksi.subtotal)}\n`;
-                if (transaksi.diskon_transaksi > 0) {
-                    receipt += `Diskon: Rp ${utils.formatRupiah(transaksi.diskon_transaksi)}\n`;
-                }
-                receipt += `Total: Rp ${utils.formatRupiah(transaksi.total_transaksi)}\n`;
-                receipt += `Bayar: Rp ${utils.formatRupiah(transaksi.total_bayar)}\n`;
-                const kembalian = transaksi.total_bayar - transaksi.total_transaksi;
-                if (kembalian >= 0) {
-                    receipt += `Kembalian: Rp ${utils.formatRupiah(kembalian)}\n`;
-                } else {
-                    receipt += `Kurang: Rp ${utils.formatRupiah(Math.abs(kembalian))}\n`;
-                }
-                receipt += '\nTerima Kasih!\n';
-                receipt += '\x1D\x56\x42\x00';
-
-                await writer.write(encoder.encode(receipt));
-                await writer.close();
-                await port.close();
-            } else {
-                const printWindow = window.open(
-                    `/pos/print-invoice/${nomorFaktur}?autoprint=true`,
-                    '_blank',
-                    'width=400,height=600'
-                );
-                // Biarkan autoprint di view yang menangani print()
-                // Kita hanya perlu menutup window setelah beberapa saat
-                setTimeout(() => {
-                    if (printWindow && !printWindow.closed) {
-                        setTimeout(() => printWindow.close(), 5000);
-                    }
-                }, 1000);
-            }
-        } catch (error) {
-            console.error('Print error:', error);
-            const printWindow = window.open(
-                `/pos/print-invoice/${nomorFaktur}?autoprint=true`,
-                '_blank',
-                'width=400,height=600'
-            );
-            setTimeout(() => {
-                if (printWindow && !printWindow.closed) {
-                    setTimeout(() => printWindow.close(), 5000);
-                }
-            }, 1000);
-        }
+    printThermalReceipt: (nomorFaktur) => {
+        const printWindow = window.open(
+            `/pos/print-invoice/${nomorFaktur}?autoprint=true`,
+            '_blank',
+            'width=400,height=600'
+        );
+        // Window will handle its own printing and the user can close it
     }
 };
 
@@ -703,7 +630,7 @@ function createPaymentFunctions(state, pembayaran, computedValues, utils, core, 
 
                     state.showModal.value = false;
 
-                    await utils.printThermalReceipt(response.data.nomor_faktur);
+                    utils.printThermalReceipt(response.data.nomor_faktur);
                     core.focusBarcode();
                 }
             } catch (error) {
