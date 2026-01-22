@@ -4,7 +4,7 @@
  */
 
 export function createEditFunctions(state, refs, core) {
-    return {
+    const editFunctions = {
         /**
          * Start edit quantity
          */
@@ -42,8 +42,12 @@ export function createEditFunctions(state, refs, core) {
                 item.jumlah = newQty;
                 core.updateSubtotal(state.editSelectedIndex.value);
                 state.editQtyMode.value = false;
+
+                // Otomatis keluar mode edit dan focus barcode
+                editFunctions.batalEdit();
             } else if (state.tempQty.value <= 0) {
                 state.editQtyMode.value = false;
+                editFunctions.batalEdit();
             }
         },
 
@@ -52,9 +56,8 @@ export function createEditFunctions(state, refs, core) {
          */
         batalEditQty: () => {
             state.editQtyMode.value = false;
-            if (state.editMode.value) {
-                state.editSelectedIndex.value = -1;
-            }
+            // Otomatis keluar mode edit dan focus barcode
+            editFunctions.batalEdit();
         },
 
         /**
@@ -87,4 +90,6 @@ export function createEditFunctions(state, refs, core) {
             core.focusBarcode();
         }
     };
+
+    return editFunctions;
 }

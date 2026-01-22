@@ -506,16 +506,24 @@ function createEditFunctions(state, refs, core) {
                 item.jumlah = newQty;
                 core.updateSubtotal(state.editSelectedIndex.value);
                 state.editQtyMode.value = false;
+
+                // Otomatis keluar mode edit dan focus barcode
+                state.editMode.value = false;
+                state.editSelectedIndex.value = -1;
+                core.focusBarcode();
             } else if (state.tempQty.value <= 0) {
                 state.editQtyMode.value = false;
+                state.editMode.value = false;
+                state.editSelectedIndex.value = -1;
+                core.focusBarcode();
             }
         },
 
         batalEditQty: () => {
             state.editQtyMode.value = false;
-            if (state.editMode.value) {
-                state.editSelectedIndex.value = -1;
-            }
+            state.editMode.value = false;
+            state.editSelectedIndex.value = -1;
+            core.focusBarcode();
         },
 
         toggleEditMode: () => {
