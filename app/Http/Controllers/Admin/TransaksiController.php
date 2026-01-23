@@ -23,10 +23,10 @@ class TransaksiController extends Controller
 
         // Search by Invoice or Customer
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nomor_faktur', 'like', "%{$search}%")
-                  ->orWhere('nama_pelanggan', 'like', "%{$search}%")
-                  ->orWhere('id_operator', 'like', "%{$search}%");
+                    ->orWhere('nama_pelanggan', 'like', "%{$search}%")
+                    ->orWhere('id_operator', 'like', "%{$search}%");
             });
         }
 
@@ -41,6 +41,52 @@ class TransaksiController extends Controller
         ];
 
         return view('admin.transaksi.index', compact('transaksi', 'startDate', 'endDate', 'search', 'summary'));
+    }
+
+    public function labaRugi(Request $request)
+    {
+        $startDate = $request->input('start_date', date('Y-m-d'));
+        $endDate = $request->input('end_date', date('Y-m-d'));
+        $search = $request->input('search');
+
+        $query = \App\Models\DetailPenjualan::with('transaksi')
+            ->whereHas('transaksi', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            });
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
+                    ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%")
+                    ->orWhere('detail_penjualan.nomor_faktur', 'like', "%{$search}%");
+            });
+        }
+
+        $details = $query->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->select('detail_penjualan.*', 'transaksi_penjualan.tanggal_transaksi')
+            ->orderBy('transaksi_penjualan.tanggal_transaksi', 'desc')
+            ->paginate(20);
+
+        // Summary recalculation (using clone to not affect pagination)
+        $summaryQuery = \App\Models\DetailPenjualan::whereHas('transaksi', function ($q) use ($startDate, $endDate) {
+            $q->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        });
+
+        if ($search) {
+            $summaryQuery->where(function ($q) use ($search) {
+                $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
+                    ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%")
+                    ->orWhere('detail_penjualan.nomor_faktur', 'like', "%{$search}%");
+            });
+        }
+
+        $summary = [
+            'total_omset' => $summaryQuery->sum('subtotal_item'),
+            'total_laba' => $summaryQuery->sum('margin'),
+        ];
+        $summary['total_modal'] = $summary['total_omset'] - $summary['total_laba'];
+
+        return view('admin.transaksi.laba_rugi', compact('details', 'startDate', 'endDate', 'search', 'summary'));
     }
 
     public function show($nomor_faktur)
