@@ -295,7 +295,7 @@
                     class="rounded-lg p-3 border cursor-pointer transition-all relative overflow-hidden"
                     @click="tambahBarangDariPencarian(barang)" @mouseenter="selectedSearchIndex = index">
                     <!-- Out of Stock Overlay Text -->
-                    <div v-if="parseFloat(barang.stok_sekarang) <= 0" class="absolute top-0 right-0 bg-red-600 text-white text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider transform translate-x-[20%] translate-y-[50%] rotate-45 w-[100px] text-center shadow-sm">
+                    <div v-if="parseFloat(barang.stok_sekarang) <= 0" class="absolute top-0 right-0 bg-red-600 text-white text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider transform translate-x-[20%] translate-y-[50%] rotate-45 w-[100px] text-center shadow-sm z-20">
                         Habis
                     </div>
 
