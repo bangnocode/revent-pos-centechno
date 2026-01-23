@@ -9,7 +9,8 @@ const {
     computed,
     onMounted,
     onUnmounted,
-    nextTick
+    nextTick,
+    watch
 } = Vue;
 
 // POS State Management
@@ -41,6 +42,7 @@ function createRefs() {
         uangDibayarInput: ref(null),
         qtyModalInput: ref(null),
         searchInput: ref(null),
+        cartContainer: ref(null),
     };
 }
 
@@ -855,6 +857,30 @@ createApp({
             document.removeEventListener('keydown', keyboard.handleKeydown, true);
         });
 
+        // Watch for changes in editSelectedIndex to scroll into view
+        watch(() => state.editSelectedIndex.value, (newIndex) => {
+            if (state.editMode.value && newIndex >= 0) {
+                nextTick(() => {
+                    const activeRow = document.getElementById(`cart-item-${newIndex}`);
+                    if (activeRow && refs.cartContainer.value) {
+                        const container = refs.cartContainer.value;
+                        const headerOffset = 40; // Height of the sticky header
+                        const rowTop = activeRow.offsetTop;
+                        const rowBottom = rowTop + activeRow.offsetHeight;
+                        const containerTop = container.scrollTop;
+                        const containerBottom = containerTop + container.offsetHeight;
+
+                        // Scroll if item is not fully visible (taking header into account)
+                        if (rowTop < (containerTop + headerOffset)) {
+                            container.scrollTo({ top: rowTop - headerOffset, behavior: 'smooth' });
+                        } else if (rowBottom > containerBottom) {
+                            container.scrollTo({ top: rowBottom - container.offsetHeight, behavior: 'smooth' });
+                        }
+                    }
+                });
+            }
+        });
+
         return {
             // State
             barcode: state.barcode,
@@ -881,6 +907,7 @@ createApp({
             uangDibayarInput: refs.uangDibayarInput,
             qtyModalInput: refs.qtyModalInput,
             searchInput: refs.searchInput,
+            cartContainer: refs.cartContainer,
 
             // Computed
             ...computedValues,

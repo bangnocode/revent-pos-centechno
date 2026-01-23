@@ -53,9 +53,9 @@
     </div>
 
     <!-- Cart Items -->
-    <div class="overflow-auto max-h-[400px]">
+    <div ref="cartContainer" class="overflow-auto max-h-[400px]">
         <table class="min-w-full">
-            <thead class="bg-gray-50 sticky top-0">
+            <thead class="bg-gray-50 sticky top-0 z-10">
                 <tr class="border-b border-gray-200">
                     <th class="px-3 py-2 text-left text-xs font-bold text-gray-600 uppercase">
                         No</th>
@@ -82,6 +82,7 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 <tr v-for="(item, index) in cart" :key="`${item.kode_barang}-${index}`"
+                    :id="`cart-item-${index}`"
                     :class="{
                         'bg-blue-50 border-l-3 border-blue-500': editMode && editSelectedIndex === index,
                         'hover:bg-gray-50': true
