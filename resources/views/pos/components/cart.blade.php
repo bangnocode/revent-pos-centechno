@@ -12,7 +12,7 @@
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
-                    @{{ cart.length }} item • @{{ Math.floor(totalQty) }} pcs
+                    @{{ cart.length }} barang • @{{ Math.floor(totalQty) }} item
                 </span>
                 <button @click="toggleEditMode"
                     :class="editMode ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-800'"
