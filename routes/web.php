@@ -22,6 +22,8 @@ Route::middleware(['guest.or.auth'])->group(function () {
     Route::post('/pos/simpan-transaksi', [PosController::class, 'simpanTransaksi'])->name('pos.simpan-transaksi');
     Route::get('/pos/print-invoice/{faktur}', [PosController::class, 'printInvoice']);
     Route::get('/pos/print-invoice-data/{faktur}', [PosController::class, 'printInvoiceData']);
+    Route::get('/pos/laporan-kasir', [PosController::class, 'getLaporanKasir'])->name('pos.laporan-kasir');
+    Route::get('/pos/print-laporan-kasir', [PosController::class, 'printLaporanKasir'])->name('pos.print-laporan-kasir');
 });
 
 // Route untuk cari barang tanpa auth

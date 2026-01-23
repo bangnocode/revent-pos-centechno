@@ -74,6 +74,11 @@
             </div>
             <div
                 class="flex items-center gap-1 bg-white bg-opacity-10 hover:bg-opacity-20 transition-all rounded px-1.5 py-1 text-xs text-white">
+                <kbd class="bg-white bg-opacity-20 px-1 py-0.5 rounded text-xs font-mono font-semibold">F10</kbd>
+                <span class="hidden sm:inline">Laporan Kasir (F10)</span>
+            </div>
+            <div
+                class="flex items-center gap-1 bg-white bg-opacity-10 hover:bg-opacity-20 transition-all rounded px-1.5 py-1 text-xs text-white">
                 <kbd
                     class="bg-white bg-opacity-20 px-1 py-0.5 rounded text-xs font-mono font-semibold">ESC</kbd>
                 <span class="hidden sm:inline">Batal (ESC)</span>

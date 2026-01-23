@@ -394,3 +394,210 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Laporan Kasir -->
+<div v-if="showModalLaporan" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-70 backdrop-blur-sm" @click="tutupModalLaporan"></div>
+
+    <!-- Modal Content -->
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl z-10 flex flex-col overflow-hidden animate-fade-in-up">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-4 flex items-center justify-between border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-500 rounded-lg shadow-lg shadow-blue-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Laporan Kasir</h2>
+                    <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Rekapitulasi Transaksi Anda</p>
+                </div>
+            </div>
+            <button @click="tutupModalLaporan" class="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto max-h-[70vh] bg-slate-50">
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Tanggal Mulai</label>
+                        <input type="date" v-model="laporanFilters.start_date" @change="updateLaporan(true)"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Tanggal Akhir</label>
+                        <input type="date" v-model="laporanFilters.end_date" @change="updateLaporan(true)"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Cari No. Faktur</label>
+                        <div class="relative">
+                            <input type="text" v-model="laporanFilters.search" @input.debounce.500ms="updateLaporan(true)" 
+                                placeholder="Masukkan nomor faktur..."
+                                class="w-full px-3 py-2 pl-10 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                            <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="isLoadingLaporan" class="flex flex-col items-center justify-center py-20">
+                <svg class="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-slate-500 font-medium">Memuat data laporan...</p>
+            </div>
+
+            <div v-else>
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pendapatan</p>
+                        <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(laporanData.summary.total_semua) }}</div>
+                    </div>
+                    <div v-for="(total, metode) in laporanData.summary.per_metode" :key="metode" 
+                        class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4"
+                        :class="metode === 'tunai' ? 'border-l-green-500' : (metode === 'transfer' ? 'border-l-blue-500' : 'border-l-amber-500')">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total @{{ metode }}</p>
+                        <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(total) }}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Transaksi</p>
+                      <div class="text-xl font-black text-slate-800">@{{ laporanData.summary.jumlah_transaksi }}</div>
+                  </div>
+                </div>
+
+                <!-- Transaction Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-800 text-white font-semibold uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="px-6 py-4">Faktur & Waktu</th>
+                                <th class="px-6 py-4">Kasir</th>
+                                <th class="px-6 py-4">Pelanggan</th>
+                                <th class="px-6 py-4">Metode</th>
+                                <th class="px-6 py-4 text-right">Total Akhir</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="tr in laporanData.transaksi.data" :key="tr.nomor_faktur" class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-800">@{{ tr.nomor_faktur }}</div>
+                                    <div class="text-[10px] text-slate-500 font-medium">@{{ tr.tanggal_transaksi }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                  <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold">@{{ tr.id_operator }}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-slate-700">@{{ tr.nama_pelanggan || 'Pelanggan Umum' }}</div>
+                                    <div class="text-[10px] text-slate-400">@{{ tr.jumlah_item }} Barang</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                                        :class="tr.metode_pembayaran === 'tunai' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'">
+                                        @{{ tr.metode_pembayaran }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="font-black text-slate-900">Rp @{{ formatRupiah(tr.total_transaksi) }}</div>
+                                </td>
+                            </tr>
+                            <tr v-if="laporanData.transaksi.data.length === 0">
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                    <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V5a2 2 0 00-2-2H6a2 2 0 00-2 2v1m16 0l-1-1m-1 1l-1-1" />
+                                    </svg>
+                                    <p class="font-bold italic">Belum ada data transaksi untuk filter ini.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div v-if="laporanData.transaksi.last_page > 1" class="mt-4 flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-200">
+                    <div class="flex flex-1 justify-between sm:hidden">
+                        <button @click="setPageLaporan(laporanData.transaksi.current_page - 1)"
+                            :disabled="laporanFilters.page <= 1"
+                            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                            Sebelumnya
+                        </button>
+                        <button @click="setPageLaporan(laporanData.transaksi.current_page + 1)"
+                            :disabled="laporanFilters.page >= laporanData.transaksi.last_page"
+                            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                            Selanjutnya
+                        </button>
+                    </div>
+                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500">
+                                Menampilkan
+                                <span class="font-bold text-slate-800">@{{ laporanData.transaksi.from }}</span>
+                                sampai
+                                <span class="font-bold text-slate-800">@{{ laporanData.transaksi.to }}</span>
+                                dari
+                                <span class="font-bold text-slate-800">@{{ laporanData.transaksi.total }}</span>
+                                hasil
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                                <button @click="setPageLaporan(laporanData.transaksi.current_page - 1)"
+                                    :disabled="laporanFilters.page <= 1"
+                                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-40">
+                                    <span class="sr-only">Previous</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01.02 1.06L9.41 10l3.4 3.71a.75.75 0 11-1.14 1.02l-3.75-4.09a.75.75 0 010-1.02l3.75-4.09a.75.75 0 011.06-.02z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                
+                                <span class="relative inline-flex items-center px-4 py-2 text-sm font-bold text-slate-700 ring-1 ring-inset ring-slate-300 focus:outline-offset-0 bg-slate-50">
+                                    Halaman @{{ laporanData.transaksi.current_page }} dari @{{ laporanData.transaksi.last_page }}
+                                </span>
+
+                                <button @click="setPageLaporan(laporanData.transaksi.current_page + 1)"
+                                    :disabled="laporanFilters.page >= laporanData.transaksi.last_page"
+                                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-40">
+                                    <span class="sr-only">Next</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.59 10 7.19 6.29a.75.75 0 111.14-1.02l3.75 4.09a.75.75 0 010 1.02l-3.75 4.09a.75.75 0 01-1.06.02z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-100 px-6 py-4 border-t border-slate-200 flex justify-end items-center gap-4">
+            <p class="text-[11px] text-slate-500 font-medium italic">Total @{{ laporanData.transaksi.total }} transaksi ditemukan</p>
+            
+            <!-- Button Print Laporan Hari Ini -->
+            <button v-if="laporanFilters.start_date === today && laporanFilters.end_date === today"
+                @click="printLaporanKasir" 
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg hover:shadow-blue-600/20 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4m14 0h-2" />
+                </svg>
+                PRINT LAPORAN HARI INI
+            </button>
+
+            <button @click="tutupModalLaporan" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition-all shadow-lg hover:shadow-slate-800/20">
+                TUTUP (ESC)
+            </button>
+        </div>
+    </div>
+</div>

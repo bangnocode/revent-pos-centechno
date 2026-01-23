@@ -282,4 +282,65 @@ class PosController extends Controller
             ], 500);
         }
     }
+    public function getLaporanKasir(Request $request)
+    {
+        $startDate = $request->input('start_date', date('Y-m-d'));
+        $endDate = $request->input('end_date', date('Y-m-d'));
+        $search = $request->input('search');
+        $operator = Auth::user()->username ?? 'admin';
+
+        $query = TransaksiPenjualan::where('id_operator', $operator);
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        if ($search) {
+            $query->where('nomor_faktur', 'like', "%{$search}%");
+        }
+
+        $allFilteredTransactions = $query->get();
+
+        $transaksi = $query->orderBy('tanggal_transaksi', 'desc')->paginate(10);
+
+        $summary = [
+            'total_semua' => $allFilteredTransactions->sum('total_transaksi'),
+            'per_metode' => $allFilteredTransactions->groupBy('metode_pembayaran')->map(function ($items) {
+                return $items->sum('total_transaksi');
+            }),
+            'jumlah_transaksi' => $allFilteredTransactions->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'summary' => $summary,
+                'transaksi' => $transaksi,
+            ]
+        ]);
+    }
+
+    public function printLaporanKasir(Request $request)
+    {
+        $date = date('Y-m-d');
+        $operator = Auth::user()->username ?? 'admin';
+        $namaOperator = Auth::user()->name ?? $operator;
+
+        $query = TransaksiPenjualan::where('id_operator', $operator)
+            ->whereBetween('tanggal_transaksi', [$date . ' 00:00:00', $date . ' 23:59:59']);
+
+        $transaksi = $query->get();
+
+        $summary = [
+            'total_semua' => $transaksi->sum('total_transaksi'),
+            'per_metode' => $transaksi->groupBy('metode_pembayaran')->map(function ($items) {
+                return $items->sum('total_transaksi');
+            }),
+            'jumlah_transaksi' => $transaksi->count(),
+            'kasir' => $namaOperator,
+            'tanggal' => date('d/m/Y'),
+        ];
+
+        return view('pos.laporan_print', compact('summary'));
+    }
 }

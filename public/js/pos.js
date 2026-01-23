@@ -33,6 +33,19 @@ function createPosState() {
         diskonTransaksi: ref(0),
         diskonInput: ref('0'),
         diskonMode: ref('nominal'),
+        showModalLaporan: ref(false),
+        laporanFilters: ref({
+            start_date: new Date().toLocaleDateString('en-CA'),
+            end_date: new Date().toLocaleDateString('en-CA'),
+            search: '',
+            page: 1
+        }),
+        laporanData: ref({
+            summary: { total_semua: 0, per_metode: {}, jumlah_transaksi: 0 },
+            transaksi: { data: [], current_page: 1, last_page: 1 }
+        }),
+        isLoadingLaporan: ref(false),
+        today: ref(new Date().toLocaleDateString('en-CA')), // YYYY-MM-DD in local time
     };
 }
 
@@ -465,6 +478,58 @@ function createCoreFunctions(state, refs, utils) {
         state.diskonInput.value = '0';
     };
 
+    core.bukaModalLaporan = async () => {
+        state.today.value = new Date().toLocaleDateString('en-CA');
+        state.laporanFilters.value.page = 1;
+        state.showModalLaporan.value = true;
+        await core.updateLaporan();
+    };
+
+    core.updateLaporan = async (resetPage = false) => {
+        if (resetPage) state.laporanFilters.value.page = 1;
+        state.isLoadingLaporan.value = true;
+        try {
+            const response = await axios.get('/pos/laporan-kasir', {
+                params: state.laporanFilters.value
+            });
+            if (response.data.success) {
+                state.laporanData.value = response.data.data;
+            }
+        } catch (error) {
+            console.error('Error fetch laporan:', error);
+        } finally {
+            state.isLoadingLaporan.value = false;
+        }
+    };
+
+    core.setPageLaporan = async (page) => {
+        if (page < 1 || page > state.laporanData.value.transaksi.last_page) return;
+        state.laporanFilters.value.page = page;
+        await core.updateLaporan();
+    };
+
+    core.printLaporanKasir = () => {
+        const printWindow = window.open(
+            '/pos/print-laporan-kasir?autoprint=true',
+            '_blank',
+            'width=400,height=600'
+        );
+    };
+
+    core.tutupModalLaporan = () => {
+        state.showModalLaporan.value = false;
+
+        // Reset filter ke default
+        state.laporanFilters.value = {
+            start_date: state.today.value,
+            end_date: state.today.value,
+            search: '',
+            page: 1
+        };
+
+        core.focusBarcode();
+    };
+
     return core;
 }
 
@@ -724,6 +789,14 @@ function createKeyboardFunctions(state, core, cart, editMode, payment, refs) {
     };
 
     keyboard.handleKeydown = (e) => {
+        if (state.showModalLaporan.value) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                core.tutupModalLaporan();
+            }
+            return;
+        }
+
         if (state.showModalCari.value) {
             switch (e.key) {
                 case 'Escape':
@@ -784,6 +857,9 @@ function createKeyboardFunctions(state, core, cart, editMode, payment, refs) {
             case 'F9':
                 payment.bukaModalPembayaran();
                 break;
+            case 'F10':
+                core.bukaModalLaporan();
+                break;
 
             case 'Escape':
                 if (state.editQtyMode.value) {
@@ -792,6 +868,8 @@ function createKeyboardFunctions(state, core, cart, editMode, payment, refs) {
                     return;
                 } else if (state.showModal.value) {
                     payment.tutupModal();
+                } else if (state.showModalLaporan.value) {
+                    core.tutupModalLaporan();
                 } else if (state.editMode.value) {
                     editMode.batalEdit();
                 } else {
@@ -942,6 +1020,16 @@ createApp({
             setDiskonItem: core.setDiskonItem,
             setDiskonBarang: core.setDiskonBarang,
             toggleDiskonMode: core.toggleDiskonMode,
+            bukaModalLaporan: core.bukaModalLaporan,
+            tutupModalLaporan: core.tutupModalLaporan,
+            updateLaporan: core.updateLaporan,
+            setPageLaporan: core.setPageLaporan,
+            laporanFilters: state.laporanFilters,
+            laporanData: state.laporanData,
+            isLoadingLaporan: state.isLoadingLaporan,
+            showModalLaporan: state.showModalLaporan,
+            today: state.today,
+            printLaporanKasir: core.printLaporanKasir,
         };
     }
 }).mount('#app');
