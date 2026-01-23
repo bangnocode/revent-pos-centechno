@@ -562,7 +562,8 @@ function createEditFunctions(state, refs, core) {
             }
 
             state.editMode.value = !state.editMode.value;
-            state.editSelectedIndex.value = state.editMode.value ? 0 : -1;
+            // Fokus ke item terakhir saat masuk mode edit
+            state.editSelectedIndex.value = state.editMode.value ? (state.cart.value.length - 1) : -1;
 
             if (state.editMode.value) {
                 if (refs.barcodeInput.value) {
