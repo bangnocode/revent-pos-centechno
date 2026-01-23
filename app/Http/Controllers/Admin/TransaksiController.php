@@ -64,6 +64,7 @@ class TransaksiController extends Controller
 
         $details = $query->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
             ->select('detail_penjualan.*', 'transaksi_penjualan.tanggal_transaksi')
+            ->orderBy('detail_penjualan.nama_barang', 'asc')
             ->orderBy('transaksi_penjualan.tanggal_transaksi', 'desc')
             ->paginate(20);
 
@@ -87,6 +88,48 @@ class TransaksiController extends Controller
         $summary['total_modal'] = $summary['total_omset'] - $summary['total_laba'];
 
         return view('admin.transaksi.laba_rugi', compact('details', 'startDate', 'endDate', 'search', 'summary'));
+    }
+
+    public function rekapBarang(Request $request)
+    {
+        $startDate = $request->input('start_date', date('Y-m-d'));
+        $endDate = $request->input('end_date', date('Y-m-d'));
+        $search = $request->input('search');
+
+        $query = \App\Models\DetailPenjualan::query()
+            ->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->select(
+                \Illuminate\Support\Facades\DB::raw('DATE(transaksi_penjualan.tanggal_transaksi) as tanggal'),
+                'detail_penjualan.kode_barang',
+                'detail_penjualan.nama_barang',
+                'detail_penjualan.satuan',
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.jumlah) as total_qty'),
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.subtotal_item) as total_omset'),
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.margin) as total_laba')
+            )
+            ->whereBetween('transaksi_penjualan.tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
+                    ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%");
+            });
+        }
+
+        // Clone query for totals summary
+        $summaryQuery = clone $query;
+        $summary = [
+            'total_omset' => $summaryQuery->sum('detail_penjualan.subtotal_item'),
+            'total_qty' => $summaryQuery->sum('detail_penjualan.jumlah'),
+            'total_laba' => $summaryQuery->sum('detail_penjualan.margin'),
+        ];
+
+        $rekap = $query->groupBy('tanggal', 'detail_penjualan.kode_barang', 'detail_penjualan.nama_barang', 'detail_penjualan.satuan')
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('detail_penjualan.nama_barang', 'asc')
+            ->paginate(20);
+
+        return view('admin.transaksi.rekap_barang', compact('rekap', 'startDate', 'endDate', 'search', 'summary'));
     }
 
     public function show($nomor_faktur)

@@ -53,7 +53,7 @@
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <p class="text-xs text-gray-500 font-semibold uppercase">Total Laba Bersih</p>
-        <h3 class="text-xl font-bold text-green-600">Rp {{ number_format($summary['total_laba'], 0, ',', '.') }}</h3>
+        <h3 class="text-xl font-bold {{ $summary['total_laba'] >= 0 ? 'text-green-600 bg-green-50/30' : 'text-red-600 bg-red-50/30' }}">Rp {{ number_format($summary['total_laba'], 0, ',', '.') }}</h3>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
                     <th class="px-4 py-3 text-center">Qty</th>
                     <th class="px-4 py-3 text-right">Diskon</th>
                     <th class="px-4 py-3 text-right">Subtotal</th>
-                    <th class="px-4 py-3 text-right bg-blue-50 text-blue-700">Laba Rugi</th>
+                    <th class="px-4 py-3 text-right">Laba Rugi</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
