@@ -108,10 +108,13 @@
                             <span>• Laporan Penjualan</span>
                         </a>
                         <a href="{{ route('admin.transaksi.laba-rugi') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.laba-rugi') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
-                            <span>• Laba Rugi</span>
+                            <span>• Omset Detail</span>
                         </a>
                         <a href="{{ route('admin.transaksi.rekap-barang') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
-                            <span>• Rekap Per Barang</span>
+                            <span>• Omset Per Barang</span>
+                        </a>
+                        <a href="{{ route('admin.transaksi.rekap-barang') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Omset Per Tanggal</span>
                         </a>
                     </div>
                 </div>
@@ -228,10 +231,13 @@
                             <span>• Laporan Penjualan</span>
                         </a>
                         <a href="{{ route('admin.transaksi.laba-rugi') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.laba-rugi') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
-                            <span>• Laba Rugi</span>
+                            <span>• Omset Detail</span>
                         </a>
                         <a href="{{ route('admin.transaksi.rekap-barang') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
-                            <span>• Rekap Per Barang</span>
+                            <span>• Omset Per Barang</span>
+                        </a>
+                        <a href="{{ route('admin.transaksi.rekap-barang') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Omset Per Tanggal</span>
                         </a>
                     </div>
                 </div>
