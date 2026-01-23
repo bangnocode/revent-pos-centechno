@@ -216,7 +216,7 @@
 
                 <!-- Search Input -->
                 <div class="relative">
-                    <input type="text" x-model="barangSearchKeyword" @input.debounce.300ms="searchBarang" @keydown.esc="closeBarangModal"
+                    <input type="text" x-model="barangSearchKeyword" @input.debounce.700ms="searchBarang" @keydown.esc="closeBarangModal"
                         class="w-full px-4 py-2.5 pl-11 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm"
                         placeholder="Cari nama barang, kode, atau barcode..." x-ref="searchInput">
                     <svg class="absolute left-4 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
