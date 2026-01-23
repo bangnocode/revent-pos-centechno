@@ -30,7 +30,7 @@
                 </div>
 
                 @auth
-                <form action="{{ route('logout') }}" method="POST" class="inline-block">
+                <form action="{{ route('logout') }}" method="POST" class="m-0 flex items-center">
                     @csrf
                     <button type="submit" class="bg-red-500 hover:bg-red-600 text-white rounded px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1" title="Logout">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
