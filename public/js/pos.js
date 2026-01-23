@@ -100,7 +100,8 @@ function createComputedValues(state, pembayaran) {
             const harga = parseFloat(item.harga_satuan) || 0;
             const qty = parseFloat(item.jumlah) || 0;
             const diskonItem = parseFloat(item.diskon_item) || 0;
-            return sum + ((harga * qty) - diskonItem);
+            const diskonBarang = parseFloat(item.diskon_barang) || 0;
+            return sum + ((harga * qty) - (diskonItem * qty) - diskonBarang);
         }, 0);
     });
 
@@ -192,12 +193,27 @@ function createCoreFunctions(state, refs, utils) {
         let numericStr = value.replace(/[^\d]/g, '');
         let diskon = Math.max(0, parseInt(numericStr) || 0);
 
-        const maxDiskon = item.harga_satuan * item.jumlah;
-        if (diskon > maxDiskon) {
-            diskon = maxDiskon;
+        const maxDiskonPerUnit = item.harga_satuan;
+        if (diskon > maxDiskonPerUnit) {
+            diskon = maxDiskonPerUnit;
         }
 
         item.diskon_item = diskon;
+        core.updateSubtotal(index);
+    };
+
+    core.setDiskonBarang = (index, value) => {
+        const item = state.cart.value[index];
+        let numericStr = value.replace(/[^\d]/g, '');
+        let diskon = Math.max(0, parseInt(numericStr) || 0);
+
+        // Maksimal diskon barang adalah subtotal baris setelah diskon item
+        const subtotalSetelahItem = (item.harga_satuan * item.jumlah) - (item.diskon_item * item.jumlah);
+        if (diskon > subtotalSetelahItem) {
+            diskon = subtotalSetelahItem;
+        }
+
+        item.diskon_barang = diskon;
         core.updateSubtotal(index);
     };
 
@@ -206,8 +222,19 @@ function createCoreFunctions(state, refs, utils) {
         const harga = parseFloat(item.harga_satuan) || 0;
         const qty = parseFloat(item.jumlah) || 0;
         const diskonItem = parseFloat(item.diskon_item) || 0;
+        const diskonBarang = parseFloat(item.diskon_barang) || 0;
 
-        item.subtotal = (harga * qty) - diskonItem;
+        // Hitung subtotal dan pastikan tidak negatif
+        const totalHarga = harga * qty;
+        const totalDiskonItem = diskonItem * qty;
+
+        // Re-validate diskon_barang jika diskon_item atau qty berubah
+        const currentSubtotalSetelahItem = Math.max(0, totalHarga - totalDiskonItem);
+        if (item.diskon_barang > currentSubtotalSetelahItem) {
+            item.diskon_barang = currentSubtotalSetelahItem;
+        }
+
+        item.subtotal = Math.max(0, totalHarga - totalDiskonItem - item.diskon_barang);
     };
 
     core.tambahBarang = async () => {
@@ -252,6 +279,7 @@ function createCoreFunctions(state, refs, utils) {
                         satuan: barang.satuan,
                         stok_sekarang: barang.stok_sekarang,
                         diskon_item: 0,
+                        diskon_barang: 0,
                         subtotal: parseFloat(barang.harga_jual_normal)
                     });
                 }
@@ -374,6 +402,7 @@ function createCoreFunctions(state, refs, utils) {
                 satuan: barang.satuan,
                 stok_sekarang: barang.stok_sekarang,
                 diskon_item: 0,
+                diskon_barang: 0,
                 subtotal: parseFloat(barang.harga_jual_normal)
             });
         }
@@ -600,6 +629,7 @@ function createPaymentFunctions(state, pembayaran, computedValues, utils, core, 
                         jumlah: parseFloat(item.jumlah),
                         satuan: item.satuan,
                         diskon_item: parseFloat(item.diskon_item || 0),
+                        diskon_barang: parseFloat(item.diskon_barang || 0),
                         subtotal: parseFloat(item.subtotal)
                     })),
                     nama_pelanggan: pembayaran.value.nama_pelanggan,
@@ -878,6 +908,7 @@ createApp({
             tambahBarangDariPencarian: core.tambahBarangDariPencarian,
             tutupModalCari: core.tutupModalCari,
             setDiskonItem: core.setDiskonItem,
+            setDiskonBarang: core.setDiskonBarang,
             toggleDiskonMode: core.toggleDiskonMode,
         };
     }

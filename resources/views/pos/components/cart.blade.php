@@ -69,6 +69,10 @@
                         class="px-3 py-2 text-left text-xs font-bold text-gray-600 uppercase">
                         Diskon Item
                     </th>
+                    <th v-if="editMode"
+                        class="px-3 py-2 text-left text-xs font-bold text-gray-600 uppercase">
+                        Diskon Barang
+                    </th>
                     <th class="px-3 py-2 text-left text-xs font-bold text-gray-600 uppercase">
                         Subtotal</th>
                     <th v-if="editMode"
@@ -122,14 +126,28 @@
                         <div class="relative">
                             <div
                                 class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <span class="text-gray-500 text-xs">Rp</span>
+                                <span class="text-gray-500 text-[10px]">Rp</span>
                             </div>
                             <input :value="formatRupiah(item.diskon_item)" type="text"
                                 @input="setDiskonItem(index, $event.target.value)"
-                                class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded text-xs text-right font-medium focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none">
+                                class="w-24 pl-6 pr-2 py-1 border border-gray-300 rounded text-xs text-right font-medium focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none">
                         </div>
-                        <p class="text-[10px] text-gray-400 mt-0.5 whitespace-nowrap">
-                            Maks: Rp @{{ formatRupiah(item.harga_satuan * item.jumlah) }}
+                        <p class="text-[9px] text-gray-400 mt-0.5 whitespace-nowrap">
+                            Per Unit
+                        </p>
+                    </td>
+                    <td v-if="editMode" class="px-3 py-2">
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-[10px]">Rp</span>
+                            </div>
+                            <input :value="formatRupiah(item.diskon_barang)" type="text"
+                                @input="setDiskonBarang(index, $event.target.value)"
+                                class="w-24 pl-6 pr-2 py-1 border border-gray-300 rounded text-xs text-right font-medium focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none">
+                        </div>
+                        <p class="text-[9px] text-gray-400 mt-0.5 whitespace-nowrap">
+                            Per Baris
                         </p>
                     </td>
                     <td class="px-3 py-2 text-xs font-bold text-gray-900">

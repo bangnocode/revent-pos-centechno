@@ -22,10 +22,10 @@
             <span class="text-sm font-semibold text-gray-900">@{{ Math.floor(totalQty) }} item</span>
         </div>
 
-        <!-- Diskon Item (jika ada) -->
+        <!-- Diskon Produk (Item + Barang) -->
         <div v-if="subtotalSetelahDiskonItem < subtotal"
             class="flex justify-between py-1.5 text-red-600">
-            <span class="text-xs">Diskon Item</span>
+            <span class="text-xs">Diskon Produk</span>
             <span class="text-sm font-semibold">- Rp @{{ formatRupiah(subtotal - subtotalSetelahDiskonItem) }}</span>
         </div>
 

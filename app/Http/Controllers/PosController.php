@@ -182,23 +182,26 @@ class PosController extends Controller
                     // Konversi ke float untuk memastikan
                     $hargaSatuan = floatval($item['harga_satuan']);
                     $jumlah = floatval($item['jumlah']);
-                    $diskonItem = floatval($item['diskon_item'] ?? 0);
+                    $diskonItemFactor = floatval($item['diskon_item'] ?? 0);
+                    $diskonBarangValue = floatval($item['diskon_barang'] ?? 0);
+                    $totalDiskonBaris = ($diskonItemFactor * $jumlah) + $diskonBarangValue;
+
                     $subtotalItem = floatval($item['subtotal']);
                     $hargaBeli = floatval($barang->harga_beli_terakhir ?? 0);
 
-                    // Validasi diskon item tidak lebih dari harga * qty
-                    $maxDiskonItem = $hargaSatuan * $jumlah;
-                    if ($diskonItem > $maxDiskonItem) {
+                    // Validasi diskon baris tidak lebih dari harga * qty
+                    $maxDiskonBaris = $hargaSatuan * $jumlah;
+                    if ($totalDiskonBaris > $maxDiskonBaris + 0.01) { // small tolerance
                         DB::rollBack();
                         return response()->json([
                             'success' => false,
-                            'message' => "Diskon item {$item['nama_barang']} melebihi harga"
+                            'message' => "Diskon baris {$item['nama_barang']} melebihi harga"
                         ], 400);
                     }
 
-                    $totalDiskonItem += $diskonItem;
+                    $totalDiskonItem += $totalDiskonBaris;
 
-                    // Simpan detail dengan diskon item
+                    // Simpan detail dengan diskon gabungan
                     DetailPenjualan::create([
                         'nomor_faktur' => $nomorFaktur,
                         'kode_barang' => $item['kode_barang'],
@@ -206,10 +209,10 @@ class PosController extends Controller
                         'jumlah' => $jumlah,
                         'satuan' => $item['satuan'],
                         'harga_satuan' => $hargaSatuan,
-                        'diskon_item' => $diskonItem, // Diskon per item
-                        'subtotal_item' => $subtotalItem, // Sudah termasuk diskon item
+                        'diskon_item' => $totalDiskonBaris, // Simpan total diskon baris
+                        'subtotal_item' => $subtotalItem, // Sudah termasuk diskon
                         'harga_beli_saat_itu' => $hargaBeli,
-                        'margin' => ($hargaSatuan - $hargaBeli) * $jumlah,
+                        'margin' => ($hargaSatuan - $hargaBeli) * $jumlah - $totalDiskonBaris,
                     ]);
 
                     // Update stok

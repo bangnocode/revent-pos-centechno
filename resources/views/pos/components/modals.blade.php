@@ -130,7 +130,7 @@
             <!-- Diskon Transaksi -->
             <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-xs font-medium text-gray-700">Diskon Transaksi (Global)</label>
+                    <label class="block text-xs font-medium text-gray-700 font-bold uppercase">Diskon Transaksi (Global)</label>
                     <button @click="toggleDiskonMode" type="button"
                         class="text-xs px-2 py-1 rounded border @{{ diskonMode === 'nominal' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-green-100 border-green-300 text-green-700' }}">
                         @{{ diskonMode === 'nominal' ? 'Rp' : '%' }}

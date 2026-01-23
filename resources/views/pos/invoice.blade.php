@@ -122,7 +122,7 @@
 
         @if ($transaksi->diskon_transaksi > 0)
             <tr>
-                <td>Diskon Trans:</td>
+                <td>Diskon Transaksi:</td>
                 <td class="text-right">- Rp {{ number_format($transaksi->diskon_transaksi, 0, ',', '.') }}</td>
             </tr>
         @endif
