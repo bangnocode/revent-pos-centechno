@@ -54,14 +54,16 @@ class PembelianController extends Controller
      */
     public function create()
     {
-        $suppliers = Supplier::where('status_aktif', true)->get();
+        $suppliers = Supplier::where('status_aktif', true)->orderBy('nama_supplier', 'asc')->get();
+        $satuans = \App\Models\Satuan::aktif()->orderBy('nama_satuan', 'asc')->get();
+
         // Generate auto number for PO? e.g. PO-YYYYMMDD-XXXX
         $today = date('Ymd');
         $lastPo = Pembelian::whereDate('created_at', date('Y-m-d'))->latest()->first();
         $nextNo = $lastPo ? (int)substr($lastPo->nomor_faktur, -3) + 1 : 1;
         $nomorFaktur = 'PO-' . $today . '-' . str_pad($nextNo, 3, '0', STR_PAD_LEFT);
 
-        return view('admin.pembelian.create', compact('suppliers', 'nomorFaktur'));
+        return view('admin.pembelian.create', compact('suppliers', 'nomorFaktur', 'satuans'));
     }
 
     /**

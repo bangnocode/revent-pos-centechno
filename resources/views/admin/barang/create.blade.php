@@ -22,11 +22,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Kode Barang -->
                     <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Kode Barang <span
-                                class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700">Kode Barang </label>
                         <input type="text" name="kode_barang" value="{{ old('kode_barang') }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Contoh: BRG001" required>
+                            placeholder="Kosongkan untuk generate otomatis">
                         @error('kode_barang')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -34,10 +33,11 @@
 
                     <!-- Barcode -->
                     <div class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-700">Barcode / SKU</label>
+                        <label class="block text-sm font-medium text-gray-700">Barcode / SKU <span
+                                class="text-red-500">*</span></label>
                         <input type="text" name="barcode" value="{{ old('barcode') }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Scan barcode disini...">
+                            placeholder="Scan barcode disini..." required>
                         @error('barcode')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

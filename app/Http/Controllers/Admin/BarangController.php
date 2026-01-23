@@ -43,23 +43,48 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_barang' => 'required|unique:barang,kode_barang|max:20',
-            'barcode' => 'nullable|unique:barang,barcode|max:50',
+            'kode_barang' => 'nullable|unique:barang,kode_barang|max:20',
+            'barcode' => 'required|unique:barang,barcode|max:50',
             'nama_barang' => 'required|max:100',
             'kategori' => 'nullable|max:50',
             'satuan_id' => 'required|exists:satuans,id',
             'nama_supplier' => 'nullable|string|max:100',
             'harga_beli_terakhir' => 'required|numeric|min:0',
             'harga_jual_normal' => 'required|numeric|min:0',
-            'stok_sekarang' => 'required|numeric',
+            'stok_sekarang' => 'nullable|numeric',
+        ], [
+            'barcode.required' => 'Barcode / SKU wajib diisi',
+            'barcode.unique' => 'Barcode / SKU sudah digunakan',
+            'kode_barang.unique' => 'Kode barang sudah digunakan',
+            'nama_barang.required' => 'Nama barang wajib diisi',
+            'satuan_id.required' => 'Satuan wajib dipilih',
+            'harga_jual_normal.required' => 'Harga jual wajib diisi',
         ]);
 
         $data = $request->all();
+        $data['stok_sekarang'] = $data['stok_sekarang'] ?? 0;
+
+        // Generate random kode_barang if empty
+        if (empty($data['kode_barang'])) {
+            do {
+                $randomCode = strtoupper(Str::random(8));
+            } while (Barang::where('kode_barang', $randomCode)->exists());
+            $data['kode_barang'] = $randomCode;
+        }
+
         // Set satuan field untuk backward compatibility
         $satuan = \App\Models\Satuan::find($request->satuan_id);
         $data['satuan'] = $satuan->nama_satuan;
 
-        Barang::create($data);
+        $barang = Barang::create($data);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang berhasil ditambahkan',
+                'data' => $barang
+            ]);
+        }
 
         return redirect()->route('admin.barang.index')
             ->with('success', 'Barang berhasil ditambahkan');

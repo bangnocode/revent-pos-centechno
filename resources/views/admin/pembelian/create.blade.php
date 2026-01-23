@@ -94,6 +94,13 @@
                                         class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm">
                                         Cari
                                     </button>
+                                    <button type="button" @click="openNewBarangModal" 
+                                        class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1 whitespace-nowrap">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Barang Baru
+                                    </button>
                                 </div>
                             </div>
                             <div>
@@ -215,6 +222,95 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Tambah Barang Baru -->
+    <div x-show="showNewBarangModal" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] overflow-y-auto py-10">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 my-auto">
+            <div class="p-4 border-b">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Tambah Barang Baru</h3>
+                    <button @click="closeNewBarangModal" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <form @submit.prevent="saveNewBarang">
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kode Barang</label>
+                            <input type="text" x-model="newBarang.kode_barang"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                placeholder="Kosongkan untuk generate otomatis">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Barcode / SKU <span class="text-red-500">*</span></label>
+                            <input type="text" x-model="newBarang.barcode" required
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                placeholder="Scan barcode disini...">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Barang <span class="text-red-500">*</span></label>
+                        <input type="text" x-model="newBarang.nama_barang" required
+                            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                            placeholder="Contoh: Kopi Kapal Api 65gr">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                            <input type="text" x-model="newBarang.kategori"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                placeholder="Contoh: Minuman">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Satuan <span class="text-red-500">*</span></label>
+                            <select x-model="newBarang.satuan_id" required
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm">
+                                <option value="">-- Pilih Satuan --</option>
+                                @foreach($satuans as $sat)
+                                <option value="{{ $sat->id }}">{{ $sat->nama_satuan }} {{ $sat->singkatan ? '('.$sat->singkatan.')' : '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual Normal <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
+                                <input type="text" x-model="newBarang.harga_jual_normal" @input="newBarang.harga_jual_normal = formatNumberRibuan($event.target.value)" required
+                                    class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                    placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stok Awal</label>
+                            <input type="text" x-model="newBarang.stok_sekarang" @input="newBarang.stok_sekarang = formatNumberRibuan($event.target.value)"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t bg-gray-50 flex justify-end gap-3 rounded-b-lg">
+                    <button type="button" @click="closeNewBarangModal"
+                        class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" :disabled="isSavingBarang"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg shadow-sm flex items-center gap-2">
+                        <svg x-show="isSavingBarang" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="isSavingBarang ? 'Menyimpan...' : 'Simpan Barang'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -251,6 +347,20 @@ document.addEventListener('alpine:init', () => {
         barangSearchKeyword: '',
         barangList: [],
 
+        // New Barang Modal
+        showNewBarangModal: false,
+        isSavingBarang: false,
+        newBarang: {
+            kode_barang: '',
+            barcode: '',
+            nama_barang: '',
+            kategori: '',
+            satuan_id: '',
+            harga_beli_terakhir: 0,
+            harga_jual_normal: '0',
+            stok_sekarang: '0'
+        },
+
         get grandTotal() {
             const total = this.form.items.reduce((sum, item) => {
                 const qty = parseFloat(unformatNumberRibuan(item.jumlah)) || 0;
@@ -270,7 +380,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.newItem.kode_barang}`);
                 const data = await response.json();
-                const barang = data.find(b => b.kode_barang.toLowerCase() === this.newItem.kode_barang.toLowerCase());
+                const barang = data.find(b => b.kode_barang.toLowerCase() === this.newItem.kode_barang.toLowerCase() || (b.barcode && b.barcode.toLowerCase() === this.newItem.kode_barang.toLowerCase()));
                 if (barang) {
                     this.isValidKode = true;
                     this.validationMessage = 'Barang ditemukan';
@@ -291,18 +401,19 @@ document.addEventListener('alpine:init', () => {
         addItem() {
             if (!this.isValidKode || !this.newItem.jumlah || !this.newItem.subtotal) return;
             const subtotal = unformatNumberRibuan(this.newItem.subtotal);
-            const jumlah = parseFloat(this.newItem.jumlah);
+            const jumlah = parseFloat(unformatNumberRibuan(this.newItem.jumlah));
             if (jumlah <= 0 || subtotal <= 0) return;
             const hargaBeli = Math.round(subtotal / jumlah);
             // Check if already in cart
-            const existing = this.form.items.find(i => i.kode_barang === this.newItem.kode_barang);
+            const existing = this.form.items.find(i => i.kode_barang === this.selectedBarang.kode_barang);
             if (existing) {
-                existing.jumlah = (parseFloat(existing.jumlah) + jumlah).toString();
+                existing.jumlah = (parseFloat(unformatNumberRibuan(existing.jumlah)) + jumlah).toString();
+                existing.jumlah = formatNumberRibuan(existing.jumlah);
             } else {
                 this.form.items.push({
-                    kode_barang: this.newItem.kode_barang,
+                    kode_barang: this.selectedBarang.kode_barang,
                     nama_barang: this.selectedBarang.nama_barang,
-                    jumlah: this.newItem.jumlah.toString(),
+                    jumlah: formatNumberRibuan(jumlah),
                     harga_beli: formatNumberRibuan(hargaBeli),
                     harga_jual: Math.round(this.selectedBarang.harga_jual_normal || 0)
                 });
@@ -395,6 +506,71 @@ document.addEventListener('alpine:init', () => {
             this.newItem.kode_barang = barang.kode_barang;
             this.validateKodeBarang();
             this.closeBarangModal();
+        },
+
+        openNewBarangModal() {
+            this.showNewBarangModal = true;
+            this.newBarang = {
+                kode_barang: '',
+                barcode: '',
+                nama_barang: '',
+                kategori: '',
+                satuan_id: '',
+                harga_beli_terakhir: 0,
+                harga_jual_normal: '0',
+                stok_sekarang: '0'
+            };
+        },
+
+        closeNewBarangModal() {
+            this.showNewBarangModal = false;
+        },
+
+        async saveNewBarang() {
+            this.isSavingBarang = true;
+            
+            // Prepare data
+            const data = {
+                ...this.newBarang,
+                harga_jual_normal: unformatNumberRibuan(this.newBarang.harga_jual_normal),
+                stok_sekarang: unformatNumberRibuan(this.newBarang.stok_sekarang),
+                harga_beli_terakhir: 0 // Will be updated by the purchase transaction
+            };
+
+            try {
+                const response = await fetch('{{ route("admin.barang.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Success!
+                    this.closeNewBarangModal();
+                    // Select the new barang
+                    this.newItem.kode_barang = result.data.kode_barang;
+                    this.validateKodeBarang();
+                    alert('Barang berhasil ditambahkan');
+                } else {
+                    // Handle validation errors
+                    let errorMsg = result.message || 'Gagal menyimpan barang';
+                    if (result.errors) {
+                        errorMsg += '\n' + Object.values(result.errors).flat().join('\n');
+                    }
+                    alert(errorMsg);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Terjadi kesalahan koneksi');
+            } finally {
+                this.isSavingBarang = false;
+            }
         }
     }));
 });
