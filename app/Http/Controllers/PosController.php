@@ -75,14 +75,14 @@ class PosController extends Controller
             }
         } else {
             // Untuk manual search, cari berdasarkan nama atau kode
-            $barang = Barang::where(function ($query) use ($keyword) {
-                $query->where('nama_barang', 'like', "%$keyword%")
-                    ->orWhere('kode_barang', 'like', "%$keyword%")
-                    ->orWhere('barcode', 'like', "%$keyword%");
-            })
+            $term = '%' . $keyword . '%';
+            $barang = Barang::where('nama_barang', 'like', $term)
+                ->orWhere('kode_barang', 'like', $term)
+                ->orWhere('barcode', 'like', $term)
+                ->limit(20)
                 ->get();
 
-            Log::info('Hasil manual', ['count' => $barang->count()]); // Debug
+            Log::info('Hasil manual', ['keyword' => $keyword, 'count' => $barang->count()]);
 
             return response()->json([
                 'success' => true,

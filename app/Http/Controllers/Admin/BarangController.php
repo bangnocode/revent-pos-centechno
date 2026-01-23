@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BarangController extends Controller
@@ -147,14 +148,18 @@ class BarangController extends Controller
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $keyword = trim($request->input('keyword', ''));
         if (empty($keyword)) return response()->json([]);
 
-        $barang = Barang::where('nama_barang', 'like', "%{$keyword}%")
-            ->orWhere('kode_barang', 'like', "%{$keyword}%")
-            ->orWhere('barcode', 'like', "%{$keyword}%")
-            ->limit(10)
+        $term = '%' . $keyword . '%';
+        $barang = Barang::where('nama_barang', 'like', $term)
+            ->orWhere('kode_barang', 'like', $term)
+            ->orWhere('barcode', 'like', $term)
+            ->limit(20)
             ->get();
+
+        Log::info('Admin Barang Search', ['keyword' => $keyword, 'count' => $barang->count()]);
+
         return response()->json($barang);
     }
 }
