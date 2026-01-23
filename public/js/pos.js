@@ -590,6 +590,10 @@ function createPaymentFunctions(state, pembayaran, computedValues, utils, core, 
         bukaModalPembayaran: () => {
             if (state.cart.value.length === 0 || state.isProcessing.value) return;
 
+            // Matikan mode edit jika sedang aktif
+            state.editMode.value = false;
+            state.editSelectedIndex.value = -1;
+
             state.showModal.value = true;
             pembayaran.value.uang_dibayar = computedValues.total.value;
 

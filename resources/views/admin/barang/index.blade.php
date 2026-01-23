@@ -38,12 +38,12 @@
         <table class="w-full text-sm text-left">
             <thead class="bg-gray-50 text-gray-600 font-medium border-b border-gray-200">
                 <tr>
-                    <th class="px-6 py-3">Barang / Kode</th>
-                    <th class="px-6 py-3">Kategori</th>
-                    <th class="px-6 py-3 text-right">Harga Jual</th>
+                    <th class="px-6 py-3 text-center">Barang / Kode</th>
+                    <th class="px-6 py-3 text-center">Harga Jual</th>
+                    <th class="px-6 py-3 text-center">Harga Beli</th>
                     <th class="px-6 py-3 text-center">Stok</th>
-                    <th class="px-6 py-3 text-right">Nilai Stok</th>
-                    <th class="px-6 py-3">Supplier</th>
+                    <th class="px-6 py-3 text-center">Nilai Stok</th>
+                    <th class="px-6 py-3 text-center">Supplier</th>
                     <th class="px-6 py-3 text-center">Stok Masuk</th>
                     <th class="px-6 py-3 text-center">Stok Keluar</th>
                     <th class="px-6 py-3 text-center">Aksi</th>
@@ -56,15 +56,11 @@
                         <div class="font-semibold text-gray-900">{{ $item->nama_barang }}</div>
                         <div class="text-xs text-gray-500 font-mono mt-0.5">{{ $item->kode_barang }} <span class="text-gray-300">|</span> {{ $item->barcode }}</div>
                     </td>
-                    <td class="px-6 py-4">
-                        @if($item->kategori)
-                            <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">{{ $item->kategori }}</span>
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
-                    </td>
                     <td class="px-6 py-4 text-right font-medium text-gray-900">
                         Rp {{ number_format($item->harga_jual_normal, 0, ',', '.') }}
+                    </td>
+                    <td class="px-6 py-4 text-right font-medium text-gray-900">
+                        Rp {{ number_format($item->harga_beli_terakhir, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $item->stok_sekarang > 10 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -72,7 +68,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right font-medium text-gray-900">
-                        Rp {{ number_format($item->harga_jual_normal * $item->stok_sekarang, 0, ',', '.') }}
+                        Rp {{ number_format($item->harga_beli_terakhir * $item->stok_sekarang, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-4">
                         @if($item->nama_supplier)
