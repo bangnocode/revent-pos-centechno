@@ -132,6 +132,38 @@ class TransaksiController extends Controller
         return view('admin.transaksi.rekap_barang', compact('rekap', 'startDate', 'endDate', 'search', 'summary'));
     }
 
+    public function rekapTanggal(Request $request)
+    {
+        $startDate = $request->input('start_date', date('Y-m-d'));
+        $endDate = $request->input('end_date', date('Y-m-d'));
+
+        $query = \App\Models\DetailPenjualan::query()
+            ->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->select(
+                \Illuminate\Support\Facades\DB::raw('DATE(transaksi_penjualan.tanggal_transaksi) as tanggal'),
+                \Illuminate\Support\Facades\DB::raw('COUNT(detail_penjualan.id_detail) as total_baris_item'),
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.jumlah) as total_barang_terjual'),
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.subtotal_item) as total_omset'),
+                \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.margin) as total_laba')
+            )
+            ->whereBetween('transaksi_penjualan.tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+
+        // Clone query for totals summary
+        $summaryQuery = clone $query;
+        $summary = [
+            'total_omset' => $summaryQuery->sum('detail_penjualan.subtotal_item'),
+            'total_qty' => $summaryQuery->sum('detail_penjualan.jumlah'),
+            'total_laba' => $summaryQuery->sum('detail_penjualan.margin'),
+            'total_baris' => $summaryQuery->count('detail_penjualan.id_detail'),
+        ];
+
+        $rekap = $query->groupBy('tanggal')
+            ->orderBy('tanggal', 'desc')
+            ->paginate(20);
+
+        return view('admin.transaksi.rekap_tanggal', compact('rekap', 'startDate', 'endDate', 'summary'));
+    }
+
     public function show($nomor_faktur)
     {
         $transaksi = TransaksiPenjualan::with('details')->where('nomor_faktur', $nomor_faktur)->firstOrFail();

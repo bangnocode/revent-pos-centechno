@@ -45,6 +45,7 @@ Route::middleware(['guest.or.auth'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/transaksi', [\App\Http\Controllers\Admin\TransaksiController::class, 'index'])->name('transaksi.index');
     Route::get('/transaksi/laba-rugi', [\App\Http\Controllers\Admin\TransaksiController::class, 'labaRugi'])->name('transaksi.laba-rugi');
     Route::get('/transaksi/rekap-barang', [\App\Http\Controllers\Admin\TransaksiController::class, 'rekapBarang'])->name('transaksi.rekap-barang');
+    Route::get('/transaksi/rekap-tanggal', [\App\Http\Controllers\Admin\TransaksiController::class, 'rekapTanggal'])->name('transaksi.rekap-tanggal');
     Route::get('/transaksi/{nomor_faktur}', [\App\Http\Controllers\Admin\TransaksiController::class, 'show'])->name('transaksi.show');
 
     // Supplier & Kulakan

@@ -113,7 +113,7 @@
                         <a href="{{ route('admin.transaksi.rekap-barang') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Barang</span>
                         </a>
-                        <a href="{{ route('admin.transaksi.rekap-barang') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                        <a href="{{ route('admin.transaksi.rekap-tanggal') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-tanggal') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Tanggal</span>
                         </a>
                     </div>
@@ -236,7 +236,7 @@
                         <a href="{{ route('admin.transaksi.rekap-barang') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Barang</span>
                         </a>
-                        <a href="{{ route('admin.transaksi.rekap-barang') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-barang') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                        <a href="{{ route('admin.transaksi.rekap-tanggal') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-tanggal') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Tanggal</span>
                         </a>
                     </div>
