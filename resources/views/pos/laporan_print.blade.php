@@ -90,6 +90,12 @@
                     <td class="text-right">{{ number_format($total, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
+            @if(isset($summary['kontan_hutang']) && $summary['kontan_hutang'] > 0)
+                <tr>
+                    <td>DP Hutang:</td>
+                    <td class="text-right">{{ number_format($summary['kontan_hutang'], 0, ',', '.') }}</td>
+                </tr>
+            @endif
         </table>
 
         <hr>

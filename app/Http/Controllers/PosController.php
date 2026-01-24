@@ -304,16 +304,19 @@ class PosController extends Controller
         $transaksi = $query->orderBy('tanggal_transaksi', 'desc')->paginate(10);
 
         $summary = [
-            'total_semua' => $allFilteredTransactions->sum('total_transaksi'),
+            'total_semua' => $allFilteredTransactions->sum(function ($tr) {
+                return $tr->metode_pembayaran === 'hutang' ? $tr->total_bayar : $tr->total_transaksi;
+            }),
             'per_metode' => $allFilteredTransactions->groupBy('metode_pembayaran')->map(function ($items, $metode) {
                 if ($metode === 'hutang') {
-                    // Untuk hutang, yang dihitung sisa hutangnya (kembalian negatif)
+                    // Sisa hutangnya (kembalian negatif)
                     return $items->sum(function ($tr) {
                         return $tr->kembalian < 0 ? abs($tr->kembalian) : 0;
                     });
                 }
                 return $items->sum('total_transaksi');
             }),
+            'kontan_hutang' => $allFilteredTransactions->where('metode_pembayaran', 'hutang')->sum('total_bayar'),
             'jumlah_transaksi' => $allFilteredTransactions->count(),
         ];
 
@@ -338,7 +341,9 @@ class PosController extends Controller
         $transaksi = $query->get();
 
         $summary = [
-            'total_semua' => $transaksi->sum('total_transaksi'),
+            'total_semua' => $transaksi->sum(function ($tr) {
+                return $tr->metode_pembayaran === 'hutang' ? $tr->total_bayar : $tr->total_transaksi;
+            }),
             'per_metode' => $transaksi->groupBy('metode_pembayaran')->map(function ($items, $metode) {
                 if ($metode === 'hutang') {
                     return $items->sum(function ($tr) {
@@ -347,6 +352,7 @@ class PosController extends Controller
                 }
                 return $items->sum('total_transaksi');
             }),
+            'kontan_hutang' => $transaksi->where('metode_pembayaran', 'hutang')->sum('total_bayar'),
             'jumlah_transaksi' => $transaksi->count(),
             'kasir' => $namaOperator,
             'tanggal' => date('d/m/Y'),

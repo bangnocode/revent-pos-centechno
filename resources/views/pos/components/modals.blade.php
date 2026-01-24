@@ -463,7 +463,7 @@
                 <!-- Summary Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pendapatan</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Uang Diterima</p>
                         <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(laporanData.summary.total_semua) }}</div>
                     </div>
                     <div v-for="(total, metode) in laporanData.summary.per_metode" :key="metode" 
@@ -471,6 +471,12 @@
                         :class="metode === 'tunai' ? 'border-l-green-500' : (metode === 'transfer' ? 'border-l-blue-500' : 'border-l-amber-500')">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">@{{ metode === 'hutang' ? 'Total Sisa Hutang' : 'Total ' + metode }}</p>
                         <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(total) }}</div>
+                    </div>
+                    <!-- DP Hutang Card -->
+                    <div v-if="laporanData.summary.kontan_hutang > 0" 
+                        class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total DP Hutang</p>
+                        <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(laporanData.summary.kontan_hutang) }}</div>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                       <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Transaksi</p>
