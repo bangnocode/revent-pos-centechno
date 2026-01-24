@@ -75,6 +75,27 @@
             background: #c1c1c1;
             border-radius: 2px;
         }
+        /* Table Sorting Styles */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px !important;
+        }
+        th.sortable:after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            color: #ccc;
+            font-size: 0.8em;
+        }
+        th.sortable.sort-asc:after {
+            content: '↑';
+            color: #3b82f6;
+        }
+        th.sortable.sort-desc:after {
+            content: '↓';
+            color: #3b82f6;
+        }
     </style>
 </head>
 
@@ -112,3 +133,64 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script src="{{ asset('js/pos.js') }}?v={{ file_exists(public_path('js/pos.js')) ? filemtime(public_path('js/pos.js')) : time() }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Table Sorting Implementation ---
+            const enableTableSorting = () => {
+                document.querySelectorAll('table').forEach(table => {
+                    if (table.dataset.sortableEnabled) return;
+                    
+                    const headers = table.querySelectorAll('thead th');
+                    headers.forEach((header, index) => {
+                        if (!header.innerText.trim() || header.dataset.noSort !== undefined) return;
+                        
+                        header.classList.add('sortable');
+                        header.addEventListener('click', () => {
+                            const isAsc = header.classList.contains('sort-asc');
+                            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                            
+                            if (isAsc) {
+                                header.classList.add('sort-desc');
+                                sortTable(table, index, false);
+                            } else {
+                                header.classList.add('sort-asc');
+                                sortTable(table, index, true);
+                            }
+                        });
+                    });
+                    table.dataset.sortableEnabled = "true";
+                });
+            };
+
+            const sortTable = (table, column, asc = true) => {
+                const tbody = table.querySelector('tbody');
+                if (!tbody) return;
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                if (rows.length <= 1 && rows[0]?.querySelector('td[colspan]')) return;
+
+                const sortedRows = rows.sort((a, b) => {
+                    let aVal = a.querySelectorAll('td')[column]?.innerText.trim() || "";
+                    let bVal = b.querySelectorAll('td')[column]?.innerText.trim() || "";
+                    const cleanNum = (str) => {
+                        let val = str.replace(/[Rp.\s]/g, '').replace(/,/g, '.');
+                        let match = val.match(/^-?\d+(\.\d+)?/);
+                        return match ? parseFloat(match[0]) : val.toLowerCase();
+                    };
+                    const aNum = cleanNum(aVal);
+                    const bNum = cleanNum(bVal);
+                    if (typeof aNum === 'number' && typeof bNum === 'number') {
+                        return asc ? aNum - bNum : bNum - aNum;
+                    }
+                    return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                });
+                tbody.innerHTML = '';
+                sortedRows.forEach(row => tbody.appendChild(row));
+            };
+
+            enableTableSorting();
+            const observer = new MutationObserver(() => enableTableSorting());
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
+</body>

@@ -67,9 +67,9 @@
         <table class="w-full text-sm text-left">
             <thead class="bg-gray-50 text-gray-600 font-medium border-b border-gray-200">
                 <tr>
-                    <th class="px-6 py-3">Faktur & Waktu</th>
-                    <th class="px-6 py-3">Kasir</th>
-                    <th class="px-6 py-3">Pelanggan</th>
+                    <th class="px-6 py-3 text-center">Faktur & Waktu</th>
+                    <th class="px-6 py-3 text-center">Kasir</th>
+                    <th class="px-6 py-3 text-center">Pelanggan</th>
                     <th class="px-6 py-3 text-center">Total Transaksi</th>
                     <th class="px-6 py-3 text-center">Diskon Nota</th>
                     <th class="px-6 py-3 text-center">Kontan</th>

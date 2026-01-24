@@ -79,6 +79,7 @@ class PembelianController extends Controller
             'items.*.kode_barang' => 'required|exists:barang,kode_barang',
             'items.*.jumlah' => 'required|numeric|min:0.01',
             'items.*.harga_beli' => 'required|numeric|min:0',
+            'items.*.harga_jual' => 'required|numeric|min:0',
         ]);
 
         try {
@@ -89,20 +90,19 @@ class PembelianController extends Controller
                     'tanggal' => $request->tanggal,
                     'supplier_id' => $request->supplier_id,
                     'total_harga' => collect($request->items)->sum(fn($item) => $item['jumlah'] * $item['harga_beli']),
-                    'status' => 'selesai', // Directly finished for now
+                    'status' => 'selesai',
                     'metode_pembayaran' => $request->metode_pembayaran ?? 'tunai',
                     'keterangan' => $request->keterangan,
                     'user_id' => auth()->id(),
                 ]);
 
                 foreach ($request->items as $item) {
-                    // 2. Create Detail
                     $subtotal = $item['jumlah'] * $item['harga_beli'];
 
-                    // 3. Validate harga beli vs harga jual
-                    $barang = Barang::findOrFail($item['kode_barang']);
-                    if ($item['harga_beli'] > $barang->harga_jual_normal) {
-                        throw new \Exception("Harga beli untuk {$barang->nama_barang} tidak boleh lebih tinggi dari harga jual. Ubah harga jual terlebih dahulu di halaman barang.");
+                    // Validate harga beli vs harga jual
+                    if ($item['harga_beli'] > $item['harga_jual']) {
+                        $barangNama = Barang::where('kode_barang', $item['kode_barang'])->value('nama_barang');
+                        throw new \Exception("Harga beli untuk {$barangNama} tidak boleh lebih tinggi dari harga jual.");
                     }
 
                     DetailPembelian::create([
@@ -114,13 +114,14 @@ class PembelianController extends Controller
                     ]);
 
                     // 3. Update Stock & Price
-                    $barang = Barang::findOrFail($item['kode_barang']);
+                    $barang = Barang::where('kode_barang', $item['kode_barang'])->firstOrFail();
                     $stokSebelum = $barang->stok_sekarang;
 
                     $barang->stok_sekarang += $item['jumlah'];
                     $barang->harga_beli_terakhir = $item['harga_beli'];
-                    $barang->tgl_stok_masuk = now()->toDateString(); // Set tgl_stok_masuk
-                    $barang->nama_supplier = $pembelian->supplier->nama_supplier; // Set nama_supplier
+                    $barang->harga_jual_normal = $item['harga_jual']; // Update selling price
+                    $barang->tgl_stok_masuk = now()->toDateString();
+                    $barang->nama_supplier = $pembelian->supplier->nama_supplier;
                     $barang->save();
 
                     // 4. Log Inventory

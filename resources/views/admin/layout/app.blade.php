@@ -12,6 +12,27 @@
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
         }
+        /* Table Sorting Styles */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px !important;
+        }
+        th.sortable:after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            color: #ccc;
+            font-size: 0.8em;
+        }
+        th.sortable.sort-asc:after {
+            content: '↑';
+            color: #3b82f6;
+        }
+        th.sortable.sort-desc:after {
+            content: '↓';
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen font-sans antialiased text-sm" x-data="{ mobileMenuOpen: false }">
@@ -376,6 +397,82 @@
                     });
                 });
             });
+
+            // --- Table Sorting Implementation ---
+            const enableTableSorting = () => {
+                document.querySelectorAll('table').forEach(table => {
+                    if (table.dataset.sortableEnabled) return;
+                    
+                    const headers = table.querySelectorAll('thead th');
+                    headers.forEach((header, index) => {
+                        // Skip if header has no text or explicitly excluded
+                        if (!header.innerText.trim() || header.dataset.noSort !== undefined) return;
+                        
+                        header.classList.add('sortable');
+                        header.addEventListener('click', () => {
+                            const isAsc = header.classList.contains('sort-asc');
+                            
+                            // Reset other headers
+                            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                            
+                            if (isAsc) {
+                                header.classList.add('sort-desc');
+                                sortTable(table, index, false);
+                            } else {
+                                header.classList.add('sort-asc');
+                                sortTable(table, index, true);
+                            }
+                        });
+                    });
+                    
+                    table.dataset.sortableEnabled = "true";
+                });
+            };
+
+            const sortTable = (table, column, asc = true) => {
+                const tbody = table.querySelector('tbody');
+                if (!tbody) return;
+                
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                // Skip if only empty state row
+                if (rows.length === 1 && rows[0].querySelector('td[colspan]')) return;
+
+                const sortedRows = rows.sort((a, b) => {
+                    let aVal = a.querySelectorAll('td')[column]?.innerText.trim() || "";
+                    let bVal = b.querySelectorAll('td')[column]?.innerText.trim() || "";
+                    
+                    // Try to parse as number (remove Rp, dots, etc)
+                    const cleanNum = (str) => {
+                        // Remove Rp, separators, units (pcs, gr, etc)
+                        let val = str.replace(/[Rp.\s]/g, '').replace(/,/g, '.');
+                        // Extract number part if trailing units
+                        let match = val.match(/^-?\d+(\.\d+)?/);
+                        return match ? parseFloat(match[0]) : val.toLowerCase();
+                    };
+
+                    const aNum = cleanNum(aVal);
+                    const bNum = cleanNum(bVal);
+
+                    if (typeof aNum === 'number' && typeof bNum === 'number') {
+                        return asc ? aNum - bNum : bNum - aNum;
+                    }
+                    
+                    return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                });
+
+                // Clear and append
+                tbody.innerHTML = '';
+                sortedRows.forEach(row => tbody.appendChild(row));
+            };
+
+            // Initial call
+            enableTableSorting();
+
+            // Support for dynamically added tables (e.g. via Livewire or AJAX modals)
+            const observer = new MutationObserver(() => {
+                enableTableSorting();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
 </body>

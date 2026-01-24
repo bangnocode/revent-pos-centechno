@@ -83,10 +83,10 @@
         <p class="mb-2">Tanggal: {{ $summary['tanggal'] }}</p>
         <hr>
 
-        <table>
+        <table> 
             @foreach ($summary['per_metode'] as $metode => $total)
                 <tr>
-                    <td>{{ $metode === 'hutang' ? 'Sisa Hutang:' : 'Jual ' . strtoupper($metode) . ':' }}</td>
+                    <td>{{'Jual ' . strtoupper($metode) . ':' }}</td>
                     <td class="text-right">{{ number_format($total, 0, ',', '.') }}</td>
                 </tr>
             @endforeach

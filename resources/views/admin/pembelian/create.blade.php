@@ -165,8 +165,16 @@
                                         <input type="text" x-model="item.harga_beli" @input="item.harga_beli = formatNumberRibuan($event.target.value)"
                                             class="w-full px-2 py-1 border border-gray-200 rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
                                     </td>
-                                    <td class="px-4 py-3 text-right">
-                                        <div class="text-gray-900" x-text="formatRupiah(item.harga_jual)"></div>
+                                    <td class="px-4 py-3">
+                                        <div class="relative">
+                                            <input type="text" x-model="item.harga_jual" @input="item.harga_jual = formatNumberRibuan($event.target.value)"
+                                                :class="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli) ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200'"
+                                                class="w-full px-2 py-1 border rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
+                                            <div x-show="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli)" 
+                                                class="absolute -bottom-4 right-0 text-[10px] text-red-600 font-medium whitespace-nowrap">
+                                                Harga Tidak Valid!
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3 text-right font-medium text-gray-900" x-text="formatRupiah(unformatNumberRibuan(item.jumlah) * unformatNumberRibuan(item.harga_beli))">
                                     </td>
@@ -518,7 +526,7 @@ document.addEventListener('alpine:init', () => {
                     nama_barang: this.selectedBarang.nama_barang,
                     jumlah: formatNumberRibuan(jumlah),
                     harga_beli: formatNumberRibuan(hargaBeli),
-                    harga_jual: Math.round(this.selectedBarang.harga_jual_normal || 0)
+                    harga_jual: formatNumberRibuan(Math.round(this.selectedBarang.harga_jual_normal || 0))
                 });
             }
             // Reset
@@ -536,6 +544,17 @@ document.addEventListener('alpine:init', () => {
 
         async submitForm() {
             if (this.form.items.length === 0) return;
+
+            // Check for price validation
+            const hasInvalidPrices = this.form.items.some(item => 
+                parseFloat(unformatNumberRibuan(item.harga_jual)) < parseFloat(unformatNumberRibuan(item.harga_beli))
+            );
+            
+            if (hasInvalidPrices) {
+                alert('Ada item dengan harga jual lebih rendah dari harga beli! Silakan periksa kembali.');
+                return;
+            }
+
             if (!confirm('Simpan transaksi pembelian ini? Stok barang akan bertambah.')) return;
 
             this.isSubmitting = true;
@@ -545,7 +564,8 @@ document.addEventListener('alpine:init', () => {
                 items: this.form.items.map(item => ({
                     ...item,
                     jumlah: unformatNumberRibuan(item.jumlah),
-                    harga_beli: unformatNumberRibuan(item.harga_beli)
+                    harga_beli: unformatNumberRibuan(item.harga_beli),
+                    harga_jual: unformatNumberRibuan(item.harga_jual)
                 }))
             };
 
