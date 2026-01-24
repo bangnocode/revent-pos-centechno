@@ -11,11 +11,29 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Simple stats
+        // Global stats
         $totalBarang = Barang::count();
         $totalTransaksi = TransaksiPenjualan::count();
         $totalStok = Barang::sum('stok_sekarang');
 
-        return view('admin.dashboard', compact('totalBarang', 'totalTransaksi', 'totalStok'));
+        // Today's stats
+        $todayStart = date('Y-m-d') . ' 00:00:00';
+        $todayEnd = date('Y-m-d') . ' 23:59:59';
+
+        $transaksiHariIni = TransaksiPenjualan::whereBetween('tanggal_transaksi', [$todayStart, $todayEnd])->count();
+        $omsetHariIni = TransaksiPenjualan::whereBetween('tanggal_transaksi', [$todayStart, $todayEnd])->sum('total_transaksi');
+
+        $labaHariIni = \App\Models\DetailPenjualan::whereHas('transaksi', function ($q) use ($todayStart, $todayEnd) {
+            $q->whereBetween('tanggal_transaksi', [$todayStart, $todayEnd]);
+        })->sum('margin');
+
+        return view('admin.dashboard', compact(
+            'totalBarang',
+            'totalTransaksi',
+            'totalStok',
+            'transaksiHariIni',
+            'omsetHariIni',
+            'labaHariIni'
+        ));
     }
 }

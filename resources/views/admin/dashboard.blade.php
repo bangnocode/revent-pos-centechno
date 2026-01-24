@@ -11,7 +11,73 @@
     </div>
 </div>
 
+<div class="mb-6">
+    <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </span>
+        Ringkasan Aktivitas Hari Ini
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Transaksi Hari Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-orange-400 to-orange-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Transaksi</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ number_format($transaksiHariIni) }}</h3>
+                <p class="text-xs text-orange-600 mt-2 font-medium">Nota Terbit Hari Ini</p>
+            </div>
+            <div class="p-3 bg-orange-50 text-orange-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Omset Hari Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-400 to-blue-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Omset</p>
+                <h3 class="text-2xl font-bold text-gray-800">Rp {{ number_format($omsetHariIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-blue-600 mt-2 font-medium">Pendapatan Kotor</p>
+            </div>
+            <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Laba Hari Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-green-400 to-green-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Laba Rugi</p>
+                <h3 class="text-2xl font-bold text-green-600">Rp {{ number_format($labaHariIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-green-600 mt-2 font-medium">Estimasi Laba Bersih</p>
+            </div>
+            <div class="p-3 bg-green-50 text-green-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+    <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+    </span>
+    Statistik Global Keanggotaan
+</h3>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
     <!-- Card Total Barang -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
         <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600"></div>
@@ -61,21 +127,5 @@
             </svg>
         </div>
     </div>
-</div>
-
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4">
-        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-    </div>
-    <h3 class="text-xl font-bold text-gray-800 mb-2">Selamat Datang di Admin Panel</h3>
-    <p class="text-gray-500 max-w-lg mx-auto mb-6">Kelola stok barang, pantau penjualan, dan atur operasional toko Anda dengan mudah dari dashboard ini.</p>
-    <a href="{{ route('admin.barang.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/30">
-        Kelola Barang Sekarang
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
-    </a>
 </div>
 @endsection
