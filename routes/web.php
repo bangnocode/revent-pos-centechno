@@ -36,10 +36,11 @@ Route::get('/test-barang', function () {
 });
 
 // Admin Routes
-Route::middleware(['guest.or.auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('barang/search', [\App\Http\Controllers\Admin\BarangController::class, 'search'])->name('barang.search');
     Route::resource('barang', \App\Http\Controllers\Admin\BarangController::class);
+    Route::resource('user', \App\Http\Controllers\Admin\UserController::class);
 
     // Transaksi / Laporan Routes
     Route::get('/transaksi', [\App\Http\Controllers\Admin\TransaksiController::class, 'index'])->name('transaksi.index');

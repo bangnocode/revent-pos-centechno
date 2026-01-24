@@ -32,7 +32,7 @@
             
             <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden" 
                  x-data="{ 
-                    openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
+                    openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.user*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
                     openTransaksi: {{ request()->routeIs('admin.pembelian*') ? 'true' : 'false' }},
                     openLaporan: {{ request()->routeIs('admin.transaksi.*') ? 'true' : 'false' }}
                  }">
@@ -60,6 +60,9 @@
                     <div x-show="openMaster" x-transition class="pl-4 space-y-1">
                         <a href="{{ route('admin.barang.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.barang*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Barang</span>
+                        </a>
+                        <a href="{{ route('admin.user.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.user*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Kelola User</span>
                         </a>
                         <a href="{{ route('admin.supplier.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.supplier*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Supplier</span>
@@ -183,6 +186,9 @@
                     <div x-show="openMaster" x-transition class="pl-4 space-y-1">
                         <a href="{{ route('admin.barang.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.barang*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Barang</span>
+                        </a>
+                        <a href="{{ route('admin.user.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.user*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Kelola User</span>
                         </a>
                         <a href="{{ route('admin.supplier.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.supplier*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Supplier</span>
