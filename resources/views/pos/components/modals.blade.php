@@ -469,7 +469,7 @@
                     <div v-for="(total, metode) in laporanData.summary.per_metode" :key="metode" 
                         class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4"
                         :class="metode === 'tunai' ? 'border-l-green-500' : (metode === 'transfer' ? 'border-l-blue-500' : 'border-l-amber-500')">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total @{{ metode }}</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">@{{ metode === 'hutang' ? 'Total Sisa Hutang' : 'Total ' + metode }}</p>
                         <div class="text-xl font-black text-slate-800">Rp @{{ formatRupiah(total) }}</div>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -487,7 +487,8 @@
                                 <th class="px-6 py-4">Kasir</th>
                                 <th class="px-6 py-4">Pelanggan</th>
                                 <th class="px-6 py-4">Metode</th>
-                                <th class="px-6 py-4 text-right">Total Akhir</th>
+                                <th class="px-6 py-4 text-right">Total Belanja</th>
+                                <th class="px-6 py-4 text-right">Sisa Hutang</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -512,9 +513,12 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="font-black text-slate-900">Rp @{{ formatRupiah(tr.total_transaksi) }}</div>
                                 </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="font-black text-red-600">Rp @{{ tr.kembalian < 0 ? formatRupiah(Math.abs(tr.kembalian)) : 0 }}</div>
+                                </td>
                             </tr>
                             <tr v-if="laporanData.transaksi.data.length === 0">
-                                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
                                     <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V5a2 2 0 00-2-2H6a2 2 0 00-2 2v1m16 0l-1-1m-1 1l-1-1" />
                                     </svg>

@@ -139,8 +139,8 @@
             <td class="text-right">Rp {{ number_format($transaksi->total_bayar, 0, ',', '.') }}</td>
         </tr>
         <tr class="total-row">
-            <td style="padding-top: 5px;">Kembali:</td>
-            <td class="text-right" style="padding-top: 5px;">Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</td>
+            <td style="padding-top: 5px;">{{ $transaksi->metode_pembayaran == 'hutang' ? 'Hutang:' : 'Kembali:' }}</td>
+            <td class="text-right" style="padding-top: 5px;">Rp {{ number_format(abs($transaksi->kembalian), 0, ',', '.') }}</td>
         </tr>
     </table>
 

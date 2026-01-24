@@ -70,7 +70,10 @@
                     <th class="px-6 py-3">Faktur & Waktu</th>
                     <th class="px-6 py-3">Kasir</th>
                     <th class="px-6 py-3">Pelanggan</th>
-                    <th class="px-6 py-3 text-right">Total Transaksi</th>
+                    <th class="px-6 py-3 text-center">Total Transaksi</th>
+                    <th class="px-6 py-3 text-center">Diskon Nota</th>
+                    <th class="px-6 py-3 text-center">Kontan</th>
+                    <th class="px-6 py-3 text-center">Sisa Hutang</th>
                     <th class="px-6 py-3 text-center">Pembayaran</th>
                     <th class="px-6 py-3 text-center">Status</th>
                     <th class="px-6 py-3 text-center">Aksi</th>
@@ -92,9 +95,15 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="font-bold text-gray-900">Rp {{ number_format($item->total_transaksi, 0, ',', '.') }}</div>
-                         @if($item->kembalian < 0)
-                            <div class="text-xs text-red-500 mt-0.5">Kurang: Rp {{ number_format(abs($item->kembalian), 0, ',', '.') }}</div>
-                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-right text-gray-600">
+                        Rp {{ number_format($item->diskon_transaksi, 0, ',', '.') }}
+                    </td>
+                    <td class="px-6 py-4 text-right text-green-600 font-medium">
+                        Rp {{ number_format($item->total_bayar, 0, ',', '.') }}
+                    </td>
+                    <td class="px-6 py-4 text-right text-red-600 font-medium">
+                        Rp {{ number_format($item->kembalian < 0 ? abs($item->kembalian) : 0, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold text-gray-600 uppercase">{{ $item->metode_pembayaran }}</span>
@@ -119,7 +128,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>

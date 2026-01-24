@@ -305,7 +305,13 @@ class PosController extends Controller
 
         $summary = [
             'total_semua' => $allFilteredTransactions->sum('total_transaksi'),
-            'per_metode' => $allFilteredTransactions->groupBy('metode_pembayaran')->map(function ($items) {
+            'per_metode' => $allFilteredTransactions->groupBy('metode_pembayaran')->map(function ($items, $metode) {
+                if ($metode === 'hutang') {
+                    // Untuk hutang, yang dihitung sisa hutangnya (kembalian negatif)
+                    return $items->sum(function ($tr) {
+                        return $tr->kembalian < 0 ? abs($tr->kembalian) : 0;
+                    });
+                }
                 return $items->sum('total_transaksi');
             }),
             'jumlah_transaksi' => $allFilteredTransactions->count(),
@@ -333,7 +339,12 @@ class PosController extends Controller
 
         $summary = [
             'total_semua' => $transaksi->sum('total_transaksi'),
-            'per_metode' => $transaksi->groupBy('metode_pembayaran')->map(function ($items) {
+            'per_metode' => $transaksi->groupBy('metode_pembayaran')->map(function ($items, $metode) {
+                if ($metode === 'hutang') {
+                    return $items->sum(function ($tr) {
+                        return $tr->kembalian < 0 ? abs($tr->kembalian) : 0;
+                    });
+                }
                 return $items->sum('total_transaksi');
             }),
             'jumlah_transaksi' => $transaksi->count(),
