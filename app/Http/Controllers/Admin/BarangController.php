@@ -45,7 +45,7 @@ class BarangController extends Controller
     {
         $request->validate([
             'kode_barang' => 'nullable|unique:barang,kode_barang|max:20',
-            'barcode' => 'required|unique:barang,barcode|max:50',
+            'barcode' => 'nullable|unique:barang,barcode|max:50',
             'nama_barang' => 'required|max:100',
             'kategori' => 'nullable|max:50',
             'satuan_id' => 'required|exists:satuans,id',
@@ -54,7 +54,6 @@ class BarangController extends Controller
             'harga_jual_normal' => 'required|numeric|min:0',
             'stok_sekarang' => 'nullable|numeric',
         ], [
-            'barcode.required' => 'Barcode / SKU wajib diisi',
             'barcode.unique' => 'Barcode / SKU sudah digunakan',
             'kode_barang.unique' => 'Kode barang sudah digunakan',
             'nama_barang.required' => 'Nama barang wajib diisi',
@@ -89,6 +88,16 @@ class BarangController extends Controller
                 $nextNumber++;
                 $data['kode_barang'] = 'BRG' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             }
+        }
+
+        // Generate barcode if empty (EAN-13 like numeric code)
+        if (empty($data['barcode'])) {
+            do {
+                // Generate a random 12 digit number (timestamp + random digits)
+                $barcode = date('ymd') . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+            } while (Barang::where('barcode', $barcode)->exists());
+
+            $data['barcode'] = $barcode;
         }
 
         // Set satuan field untuk backward compatibility
