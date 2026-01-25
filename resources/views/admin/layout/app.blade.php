@@ -55,7 +55,7 @@
                  x-data="{ 
                     openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.user*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
                     openTransaksi: {{ request()->routeIs('admin.pembelian*') ? 'true' : 'false' }},
-                    openLaporan: {{ request()->routeIs('admin.transaksi.*') ? 'true' : 'false' }}
+                    openLaporan: {{ request()->routeIs('admin.transaksi.*') || request()->routeIs('admin.laporan.*') ? 'true' : 'false' }}
                  }">
                 
                 <a href="{{ url('/admin/dashboard') }}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-sm {{ request()->is('admin/dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -140,6 +140,9 @@
                         <a href="{{ route('admin.transaksi.rekap-tanggal') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-tanggal') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Tanggal</span>
                         </a>
+                        <a href="{{ route('admin.laporan.stok') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.laporan.stok') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Keluar Masuk Barang</span>
+                        </a>
                     </div>
                 </div>
 
@@ -182,7 +185,7 @@
                  x-data="{ 
                     openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
                     openTransaksi: {{ request()->routeIs('admin.pembelian*') ? 'true' : 'false' }},
-                    openLaporan: {{ request()->routeIs('admin.transaksi.*') ? 'true' : 'false' }}
+                    openLaporan: {{ request()->routeIs('admin.transaksi.*') || request()->routeIs('admin.laporan.*') ? 'true' : 'false' }}
                  }">
                 <a href="{{ url('/admin/dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-sm {{ request()->is('admin/dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -265,6 +268,9 @@
                         </a>
                         <a href="{{ route('admin.transaksi.rekap-tanggal') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.transaksi.rekap-tanggal') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Omset Per Tanggal</span>
+                        </a>
+                        <a href="{{ route('admin.laporan.stok') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.laporan.stok') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Keluar Masuk Barang</span>
                         </a>
                     </div>
                 </div>

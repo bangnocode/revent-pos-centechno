@@ -52,6 +52,9 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('/transaksi/rekap-tanggal', [\App\Http\Controllers\Admin\TransaksiController::class, 'rekapTanggal'])->name('transaksi.rekap-tanggal');
     Route::get('/transaksi/{nomor_faktur}', [\App\Http\Controllers\Admin\TransaksiController::class, 'show'])->name('transaksi.show');
 
+    // Laporan Stok
+    Route::get('/laporan/stok', [\App\Http\Controllers\Admin\LaporanController::class, 'stok'])->name('laporan.stok');
+
     // Supplier & Kulakan
     Route::resource('supplier', \App\Http\Controllers\Admin\SupplierController::class);
     Route::resource('pembelian', \App\Http\Controllers\Admin\PembelianController::class);

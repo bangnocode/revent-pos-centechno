@@ -24,4 +24,31 @@ class InventoryLog extends Model
         'id_operator',
         'keterangan'
     ];
+
+    public function pembelian()
+    {
+        return $this->belongsTo(Pembelian::class, 'nomor_referensi', 'nomor_faktur');
+    }
+
+    public function penjualan()
+    {
+        return $this->belongsTo(TransaksiPenjualan::class, 'nomor_referensi', 'nomor_faktur');
+    }
+
+    public function getEntityNamaAttribute()
+    {
+        if ($this->jenis_pergerakan === 'pembelian' && $this->pembelian) {
+            return $this->pembelian->supplier->nama_supplier ?? '-';
+        }
+
+        if ($this->jenis_pergerakan === 'penjualan' && $this->penjualan) {
+            return $this->penjualan->nama_pelanggan ?? 'Pembeli Umum';
+        }
+
+        if ($this->jenis_pergerakan === 'opname') {
+            return 'Supplier Opname';
+        }
+
+        return '-';
+    }
 }
