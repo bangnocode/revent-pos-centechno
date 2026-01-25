@@ -433,7 +433,7 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual Normal <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual Normal</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
                                 <input type="text" x-model="newBarang.harga_jual_normal" @input="newBarang.harga_jual_normal = formatNumberRibuan($event.target.value)" required
