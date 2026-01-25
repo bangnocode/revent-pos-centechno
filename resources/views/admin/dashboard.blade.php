@@ -31,7 +31,7 @@
             </div>
             <div class="p-3 bg-orange-50 text-orange-600 rounded-lg group-hover:scale-110 transition-transform">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
         </div>
@@ -68,7 +68,121 @@
     </div>
 </div>
 
-<h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+<div class="mb-6">
+    <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        </span>
+        Ringkasan Aktivitas Bulan Ini
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Transaksi Bulan Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-400 to-blue-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Transaksi</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ number_format($transaksiBulanIni) }}</h3>
+                <p class="text-xs text-blue-600 mt-2 font-medium italic">{{ now()->translatedFormat('F Y') }}</p>
+            </div>
+            <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Omset Bulan Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-400 to-indigo-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Omset</p>
+                <h3 class="text-2xl font-bold text-gray-800">Rp {{ number_format($omsetBulanIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-indigo-600 mt-2 font-medium">Pendapatan Kotor Bulan Ini</p>
+            </div>
+            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Laba Bulan Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-teal-400 to-teal-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Laba Rugi</p>
+                <h3 class="text-2xl font-bold text-teal-600">Rp {{ number_format($labaBulanIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-teal-600 mt-2 font-medium">Estimasi Laba Bersih</p>
+            </div>
+            <div class="p-3 bg-teal-50 text-teal-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-6">
+    <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+        </span>
+        Ringkasan Aktivitas Tahun Ini
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Transaksi Tahun Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-purple-400 to-purple-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Transaksi</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ number_format($transaksiTahunIni) }}</h3>
+                <p class="text-xs text-purple-600 mt-2 font-medium italic">Tahun {{ date('Y') }}</p>
+            </div>
+            <div class="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Omset Tahun Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-fuchsia-400 to-fuchsia-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Omset</p>
+                <h3 class="text-2xl font-bold text-gray-800">Rp {{ number_format($omsetTahunIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-fuchsia-600 mt-2 font-medium">Pendapatan Kotor Tahun Ini</p>
+            </div>
+            <div class="p-3 bg-fuchsia-50 text-fuchsia-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Laba Tahun Ini -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between relative overflow-hidden group hover:shadow-md transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-emerald-400 to-emerald-500"></div>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Laba Rugi</p>
+                <h3 class="text-2xl font-bold text-emerald-600">Rp {{ number_format($labaTahunIni, 0, ',', '.') }}</h3>
+                <p class="text-xs text-emerald-600 mt-2 font-medium">Estimasi Laba Bersih Tahunan</p>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
     <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -127,5 +241,5 @@
             </svg>
         </div>
     </div>
-</div>
+</div> --}}
 @endsection
