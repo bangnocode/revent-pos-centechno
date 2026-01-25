@@ -12,30 +12,45 @@ class LaporanController extends Controller
     public function stok(Request $request)
     {
         $kode_barang = $request->input('kode_barang');
+        $keyword = $request->input('keyword');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
 
         $logs = null;
         $selectedBarang = null;
 
+        // Jika tidak ada kode_barang tapi ada keyword (misal user ketik lalu enter)
+        if (!$kode_barang && $keyword) {
+            $matchedBarang = Barang::where('kode_barang', $keyword)
+                ->orWhere('barcode', $keyword)
+                ->orWhere('nama_barang', 'like', '%' . $keyword . '%')
+                ->first();
+
+            if ($matchedBarang) {
+                $kode_barang = $matchedBarang->kode_barang;
+            }
+        }
+
         if ($kode_barang) {
             $selectedBarang = Barang::where('kode_barang', $kode_barang)->first();
 
-            $query = InventoryLog::where('kode_barang', $kode_barang);
+            if ($selectedBarang) {
+                $query = InventoryLog::where('kode_barang', $selectedBarang->kode_barang);
 
-            if ($start_date) {
-                $query->whereDate('tanggal_log', '>=', $start_date);
+                if ($start_date) {
+                    $query->whereDate('tanggal_log', '>=', $start_date);
+                }
+
+                if ($end_date) {
+                    $query->whereDate('tanggal_log', '<=', $end_date);
+                }
+
+                $logs = $query->orderBy('tanggal_log', 'desc')
+                    ->paginate(10)
+                    ->withQueryString();
             }
-
-            if ($end_date) {
-                $query->whereDate('tanggal_log', '<=', $end_date);
-            }
-
-            $logs = $query->orderBy('tanggal_log', 'desc')
-                ->paginate(10)
-                ->withQueryString();
         }
 
-        return view('admin.laporan.stok', compact('logs', 'selectedBarang', 'kode_barang', 'start_date', 'end_date'));
+        return view('admin.laporan.stok', compact('logs', 'selectedBarang', 'kode_barang', 'start_date', 'end_date', 'keyword'));
     }
 }

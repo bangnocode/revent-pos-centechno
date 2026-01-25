@@ -85,11 +85,11 @@
                         <!-- Row 1: Kode Barang and Quantity -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Barang <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kode / Barcode Barang <span class="text-red-500">*</span></label>
                                 <div class="flex gap-2">
                                     <input type="text" x-model="newItem.kode_barang" @input="validateKodeBarang"
                                         class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
-                                        placeholder="Masukkan kode barang">
+                                        placeholder="Masukkan kode atau scan barcode">
                                     <button type="button" @click="openBarangModal()" 
                                         class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm">
                                         Cari
@@ -268,11 +268,17 @@
                 </div>
 
                 <!-- Search Input -->
-                <div class="relative">
-                    <input type="text" x-model="barangSearchKeyword" @input.debounce.700ms="searchBarang()" @keydown.esc="closeBarangModal()"
-                        class="w-full px-4 py-2.5 pl-11 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm"
-                        placeholder="Cari nama barang, kode, atau barcode..." x-ref="searchInput">
-                    <svg class="absolute left-4 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="relative group">
+                    <input type="text" 
+                        x-model="barangSearchKeyword" 
+                        @input.debounce.300ms="searchBarang()"
+                        x-ref="searchInput"
+                        class="w-full px-4 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        placeholder="Ketik Nama / Kode / Barcode Barang..."
+                        @keydown.arrow-down.prevent="navigasiSearch(1)"
+                        @keydown.arrow-up.prevent="navigasiSearch(-1)"
+                        @keydown.enter.prevent="tambahSelectedBarang()">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>

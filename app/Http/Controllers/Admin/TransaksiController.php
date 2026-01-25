@@ -21,12 +21,18 @@ class TransaksiController extends Controller
             $query->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
         }
 
-        // Search by Invoice or Customer
+        // Search by Invoice, Customer, or Barcode (via details)
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nomor_faktur', 'like', "%{$search}%")
                     ->orWhere('nama_pelanggan', 'like', "%{$search}%")
-                    ->orWhere('id_operator', 'like', "%{$search}%");
+                    ->orWhere('id_operator', 'like', "%{$search}%")
+                    ->orWhereHas('details', function ($dq) use ($search) {
+                        $dq->where('kode_barang', 'like', "%{$search}%")
+                            ->orWhereHas('barang', function ($bq) use ($search) {
+                                $bq->where('barcode', 'like', "%{$search}%");
+                            });
+                    });
             });
         }
 
@@ -50,33 +56,34 @@ class TransaksiController extends Controller
         $search = $request->input('search');
 
         $query = \App\Models\DetailPenjualan::with('transaksi')
-            ->whereHas('transaksi', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-            });
+            ->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->leftJoin('barang', 'detail_penjualan.kode_barang', '=', 'barang.kode_barang')
+            ->whereBetween('transaksi_penjualan.tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
                     ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%")
+                    ->orWhere('barang.barcode', 'like', "%{$search}%")
                     ->orWhere('detail_penjualan.nomor_faktur', 'like', "%{$search}%");
             });
         }
 
-        $details = $query->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
-            ->select('detail_penjualan.*', 'transaksi_penjualan.tanggal_transaksi')
+        $details = $query->select('detail_penjualan.*', 'transaksi_penjualan.tanggal_transaksi')
             ->orderBy('detail_penjualan.nama_barang', 'asc')
             ->orderBy('transaksi_penjualan.tanggal_transaksi', 'desc')
             ->paginate(20);
 
-        // Summary recalculation (using clone to not affect pagination)
-        $summaryQuery = \App\Models\DetailPenjualan::whereHas('transaksi', function ($q) use ($startDate, $endDate) {
-            $q->whereBetween('tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-        });
+        // Summary recalculation
+        $summaryQuery = \App\Models\DetailPenjualan::join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->leftJoin('barang', 'detail_penjualan.kode_barang', '=', 'barang.kode_barang')
+            ->whereBetween('transaksi_penjualan.tanggal_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
         if ($search) {
             $summaryQuery->where(function ($q) use ($search) {
                 $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
                     ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%")
+                    ->orWhere('barang.barcode', 'like', "%{$search}%")
                     ->orWhere('detail_penjualan.nomor_faktur', 'like', "%{$search}%");
             });
         }
@@ -98,11 +105,13 @@ class TransaksiController extends Controller
 
         $query = \App\Models\DetailPenjualan::query()
             ->join('transaksi_penjualan', 'detail_penjualan.nomor_faktur', '=', 'transaksi_penjualan.nomor_faktur')
+            ->leftJoin('barang', 'detail_penjualan.kode_barang', '=', 'barang.kode_barang')
             ->select(
                 \Illuminate\Support\Facades\DB::raw('DATE(transaksi_penjualan.tanggal_transaksi) as tanggal'),
                 'detail_penjualan.kode_barang',
                 'detail_penjualan.nama_barang',
                 'detail_penjualan.satuan',
+                'barang.barcode',
                 \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.jumlah) as total_qty'),
                 \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.subtotal_item) as total_omset'),
                 \Illuminate\Support\Facades\DB::raw('SUM(detail_penjualan.margin) as total_laba')
@@ -112,7 +121,8 @@ class TransaksiController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('detail_penjualan.nama_barang', 'like', "%{$search}%")
-                    ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%");
+                    ->orWhere('detail_penjualan.kode_barang', 'like', "%{$search}%")
+                    ->orWhere('barang.barcode', 'like', "%{$search}%");
             });
         }
 
@@ -124,7 +134,7 @@ class TransaksiController extends Controller
             'total_laba' => $summaryQuery->sum('detail_penjualan.margin'),
         ];
 
-        $rekap = $query->groupBy('tanggal', 'detail_penjualan.kode_barang', 'detail_penjualan.nama_barang', 'detail_penjualan.satuan')
+        $rekap = $query->groupBy('tanggal', 'detail_penjualan.kode_barang', 'detail_penjualan.nama_barang', 'detail_penjualan.satuan', 'barang.barcode')
             ->orderBy('tanggal', 'desc')
             ->orderBy('detail_penjualan.nama_barang', 'asc')
             ->paginate(20);

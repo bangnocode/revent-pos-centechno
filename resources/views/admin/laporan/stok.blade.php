@@ -14,7 +14,7 @@
         <div class="md:col-span-2 space-y-1">
             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cari Barang</label>
             <div class="relative group">
-                <input type="text" id="barangSearchInput" placeholder="Ketik nama barang atau barcode..." 
+                <input type="text" id="barangSearchInput" name="keyword" value="{{ $keyword }}" placeholder="Ketik nama barang atau barcode..." 
                     class="w-full px-3 py-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs font-medium">
                 <div class="absolute left-3 top-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,7 +130,7 @@
                         </td>
                     </tr>
                     @endforeach
-                @elseif($kode_barang)
+                @elseif($kode_barang || $keyword)
                     <tr>
                         <td colspan="6" class="px-4 py-16 text-center text-gray-400">
                             <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,6 +201,8 @@
                             searchInput.value = item.nama_barang;
                             kodeBarangInput.value = item.kode_barang;
                             searchDropdown.classList.add('hidden');
+                            // Auto submit after selection
+                            searchInput.closest('form').submit();
                         };
                         searchDropdown.appendChild(div);
                     });
@@ -222,9 +224,6 @@
         }
     });
 
-    // Set initial search input value if kode_barang exists
-    @if($selectedBarang)
-        searchInput.value = '{{ $selectedBarang->nama_barang }}';
-    @endif
+    // Prevent direct form submit if input is empty but allow Enter to work normally
 </script>
 @endsection
