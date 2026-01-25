@@ -39,6 +39,9 @@ Route::get('/test-barang', function () {
 Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('barang/search', [\App\Http\Controllers\Admin\BarangController::class, 'search'])->name('barang.search');
+    Route::post('barang/cek-stok', [\App\Http\Controllers\Admin\BarangController::class, 'cekStok'])->name('barang.cek-stok');
+    Route::post('barang/update-stok-massal', [\App\Http\Controllers\Admin\BarangController::class, 'updateStokMassal'])->name('barang.update-stok-massal');
+    Route::post('barang/{kode_barang}/update-stok', [\App\Http\Controllers\Admin\BarangController::class, 'updateStok'])->name('barang.update-stok');
     Route::resource('barang', \App\Http\Controllers\Admin\BarangController::class);
     Route::resource('user', \App\Http\Controllers\Admin\UserController::class);
 

@@ -33,7 +33,9 @@ class Barang extends Model
         'tgl_stok_masuk',
         'tgl_stok_keluar',
         'tanggal_kadaluarsa',
-        'status_aktif'
+        'status_aktif',
+        'selisih_stok',
+        'tanggal_cek_stok'
     ];
 
     // Relasi dengan Satuan

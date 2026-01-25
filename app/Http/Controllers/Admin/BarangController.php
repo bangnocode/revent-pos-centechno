@@ -65,12 +65,30 @@ class BarangController extends Controller
         $data = $request->all();
         $data['stok_sekarang'] = $data['stok_sekarang'] ?? 0;
 
-        // Generate random kode_barang if empty
+        // Generate sequential kode_barang if empty (Format: BRGXXXXXX)
         if (empty($data['kode_barang'])) {
-            do {
-                $randomCode = strtoupper(Str::random(8));
-            } while (Barang::where('kode_barang', $randomCode)->exists());
-            $data['kode_barang'] = $randomCode;
+            $lastBarang = Barang::where('kode_barang', 'like', 'BRG%')
+                ->orderByRaw('LENGTH(kode_barang) DESC')
+                ->orderBy('kode_barang', 'desc')
+                ->first();
+
+            if ($lastBarang) {
+                // Ambil angka setelah 'BRG'
+                $lastCode = $lastBarang->kode_barang;
+                $lastNumber = intval(substr($lastCode, 3));
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            // Gabungkan BRG dengan angka yang di-pad 6 digit
+            $data['kode_barang'] = 'BRG' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+            // Pastikan tidak duplikat (safety check)
+            while (Barang::where('kode_barang', $data['kode_barang'])->exists()) {
+                $nextNumber++;
+                $data['kode_barang'] = 'BRG' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            }
         }
 
         // Set satuan field untuk backward compatibility
@@ -161,5 +179,97 @@ class BarangController extends Controller
         Log::info('Admin Barang Search', ['keyword' => $keyword, 'count' => $barang->count()]);
 
         return response()->json($barang);
+    }
+    public function cekStok(Request $request)
+    {
+        $request->validate([
+            'kode_barang' => 'required|exists:barang,kode_barang',
+            'stok_gudang' => 'required|numeric',
+        ]);
+
+        $barang = Barang::findOrFail($request->kode_barang);
+        $stok_database = $barang->stok_sekarang;
+        $stok_gudang = $request->stok_gudang;
+        $selisih = $stok_gudang - $stok_database;
+
+        $barang->update([
+            'selisih_stok' => $selisih,
+            'tanggal_cek_stok' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hasil cek stok berhasil disimpan untuk ' . $barang->nama_barang,
+            'data' => [
+                'selisih' => $selisih,
+                'tanggal' => now()->format('d/m/Y H:i')
+            ]
+        ]);
+    }
+
+    public function updateStok($kode_barang)
+    {
+        $barang = Barang::findOrFail($kode_barang);
+
+        if ($barang->selisih_stok == 0) {
+            return redirect()->back()->with('info', 'Tidak ada selisih stok untuk diupdate');
+        }
+
+        $stok_sebelum = $barang->stok_sekarang;
+        $selisih = $barang->selisih_stok;
+
+        $barang->stok_sekarang += $selisih;
+        $barang->selisih_stok = 0;
+        $barang->save();
+
+        // Log the inventory movement
+        \App\Models\InventoryLog::create([
+            'tanggal_log' => now(),
+            'kode_barang' => $barang->kode_barang,
+            'jenis_pergerakan' => 'opname',
+            'jumlah_pergerakan' => abs($selisih),
+            'stok_sebelum' => $stok_sebelum,
+            'stok_sesudah' => $barang->stok_sekarang,
+            'nomor_referensi' => 'OP-' . date('YmdHis'),
+            'id_operator' => \Illuminate\Support\Facades\Auth::user()->username ?? 'admin',
+            'keterangan' => 'Penyesuaian stok via opname'
+        ]);
+
+        return redirect()->back()->with('success', 'Stok barang ' . $barang->nama_barang . ' berhasil diupdate');
+    }
+
+    public function updateStokMassal()
+    {
+        $barangs = Barang::where('selisih_stok', '!=', 0)->get();
+        $count = 0;
+
+        foreach ($barangs as $barang) {
+            $stok_sebelum = $barang->stok_sekarang;
+            $selisih = $barang->selisih_stok;
+
+            $barang->stok_sekarang += $selisih;
+            $barang->selisih_stok = 0;
+            $barang->save();
+
+            // Log the inventory movement
+            \App\Models\InventoryLog::create([
+                'tanggal_log' => now(),
+                'kode_barang' => $barang->kode_barang,
+                'jenis_pergerakan' => 'opname',
+                'jumlah_pergerakan' => abs($selisih),
+                'stok_sebelum' => $stok_sebelum,
+                'stok_sesudah' => $barang->stok_sekarang,
+                'nomor_referensi' => 'OPM-' . date('YmdHis'),
+                'id_operator' => \Illuminate\Support\Facades\Auth::user()->username ?? 'admin',
+                'keterangan' => 'Penyesuaian stok via opname massal'
+            ]);
+            $count++;
+        }
+
+        if ($count == 0) {
+            return redirect()->back()->with('info', 'Tidak ada selisih stok yang perlu diupdate');
+        }
+
+        return redirect()->back()->with('success', $count . ' barang berhasil diupdate stoknya');
     }
 }

@@ -10,7 +10,7 @@
     </div>
 
     <form @submit.prevent="submitForm">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Left: Transaction Info -->
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Right: Items -->
-            <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+            <div class="lg:col-span-3 bg-white rounded-lg shadow-sm border border-gray-100 p-5">
                 <h3 class="font-semibold text-gray-800 mb-4 border-b pb-2">List Barang</h3>
 
                 <!-- Add Item Form -->
@@ -90,19 +90,22 @@
                                     <input type="text" x-model="newItem.kode_barang" @input="validateKodeBarang"
                                         class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
                                         placeholder="Masukkan kode barang">
-                                    <button type="button" @click="openBarangModal" 
+                                    <button type="button" @click="openBarangModal()" 
                                         class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm">
                                         Cari
-                                    </button>
-                                    <button type="button" @click="openNewBarangModal" 
-                                        class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1 whitespace-nowrap">
+                                </button>
+                                </div>
+                            </div>
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Tambah Data Barang Baru</label>
+    <button type="button" @click="openNewBarangModal()" 
+                                        class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1 whitespace-nowrap w-full justify-center">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                         </svg>
                                         Barang Baru
                                     </button>
-                                </div>
-                            </div>
+</div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
                                 <input type="number" x-model.number="newItem.jumlah" min="0" step="1" maxlength="6" max="100000"
@@ -138,71 +141,113 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <!-- Table Header shown only on desktop -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 text-gray-600 font-medium">
+                        <thead class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-[10px]">
                             <tr>
                                 <th class="px-4 py-3 rounded-l-lg">Barang</th>
-                                <th class="px-4 py-3 w-24 text-center">Qty</th>
+                                <th class="px-4 py-3 w-20 text-center">Qty</th>
                                 <th class="px-4 py-3 w-32 text-right">Harga Beli</th>
-                                <th class="px-4 py-3 w-32 text-right">Harga Jual</th>
+                                <th class="px-4 py-3 w-32 text-right">Harga Jual Baru</th>
                                 <th class="px-4 py-3 w-32 text-right">Subtotal</th>
                                 <th class="px-4 py-3 w-10 text-center rounded-r-lg"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <template x-for="(item, index) in form.items" :key="index">
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-blue-50/30 transition-colors">
                                     <td class="px-4 py-3">
-                                        <div class="font-medium text-gray-900" x-text="item.nama_barang"></div>
-                                        <div class="text-xs text-slate-500" x-text="item.kode_barang"></div>
+                                        <div class="font-bold text-gray-900" x-text="item.nama_barang"></div>
+                                        <div class="text-[10px] text-gray-400 font-mono" x-text="item.kode_barang"></div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <input type="text" x-model="item.jumlah" @input="item.jumlah = formatNumberRibuan($event.target.value)"
-                                            class="w-full px-2 py-1 border border-gray-200 rounded text-center focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
+                                            class="w-full px-2 py-1.5 border border-gray-200 rounded text-center focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-bold" inputmode="numeric">
                                     </td>
                                     <td class="px-4 py-3">
                                         <input type="text" x-model="item.harga_beli" @input="item.harga_beli = formatNumberRibuan($event.target.value)"
-                                            class="w-full px-2 py-1 border border-gray-200 rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
+                                            class="w-full px-2 py-1.5 border border-gray-200 rounded text-right focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-bold" inputmode="numeric">
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="relative">
                                             <input type="text" x-model="item.harga_jual" @input="item.harga_jual = formatNumberRibuan($event.target.value)"
-                                                :class="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli) ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200'"
-                                                class="w-full px-2 py-1 border rounded text-right focus:ring-1 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm" inputmode="numeric">
-                                            <div x-show="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli)" 
-                                                class="absolute -bottom-4 right-0 text-[10px] text-red-600 font-medium whitespace-nowrap">
-                                                Harga Tidak Valid!
-                                            </div>
+                                                :class="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli) ? 'border-red-500 ring-2 ring-red-100' : 'border-gray-200'"
+                                                class="w-full px-2 py-1.5 border rounded text-right focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-bold" inputmode="numeric">
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-right font-medium text-gray-900" x-text="formatRupiah(unformatNumberRibuan(item.jumlah) * unformatNumberRibuan(item.harga_beli))">
+                                    <td class="px-4 py-3 text-right font-bold text-gray-900" x-text="formatRupiah(unformatNumberRibuan(item.jumlah) * unformatNumberRibuan(item.harga_beli))">
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <button type="button" @click="removeItem(index)" class="text-red-400 hover:text-red-600">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <button type="button" @click="removeItem(index)" class="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     </td>
                                 </tr>
                             </template>
-                            <tr x-show="form.items.length === 0">
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500 text-sm">
-                                    Belum ada barang dipilih. Klik tombol + Tambah Barang.
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Card Layout for Mobile -->
+                <div class="md:hidden space-y-4">
+                    <template x-for="(item, index) in form.items" :key="index">
+                        <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                            <div class="bg-gray-50 px-4 py-2 flex justify-between items-center border-b border-gray-100">
+                                <div>
+                                    <div class="font-bold text-gray-900 text-sm" x-text="item.nama_barang"></div>
+                                    <div class="text-[10px] text-gray-400 font-mono" x-text="item.kode_barang"></div>
+                                </div>
+                                <button type="button" @click="removeItem(index)" class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-4 grid grid-cols-2 gap-4">
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Quantity</label>
+                                    <input type="text" x-model="item.jumlah" @input="item.jumlah = formatNumberRibuan($event.target.value)"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-center font-bold text-sm" inputmode="numeric">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Harga Beli (Satuan)</label>
+                                    <input type="text" x-model="item.harga_beli" @input="item.harga_beli = formatNumberRibuan($event.target.value)"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-right font-bold text-sm text-blue-600" inputmode="numeric">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Harga Jual Baru</label>
+                                    <input type="text" x-model="item.harga_jual" @input="item.harga_jual = formatNumberRibuan($event.target.value)"
+                                        :class="unformatNumberRibuan(item.harga_jual) < unformatNumberRibuan(item.harga_beli) ? 'border-red-500 ring-2 ring-red-100 text-red-600' : 'border-gray-200 text-green-600'"
+                                        class="w-full px-3 py-2 border rounded-lg text-right font-bold text-sm" inputmode="numeric">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Subtotal (Qty x Beli)</label>
+                                    <div class="text-right font-extrabold text-gray-900 py-2" x-text="formatRupiah(unformatNumberRibuan(item.jumlah) * unformatNumberRibuan(item.harga_beli))"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="form.items.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="font-medium">Belum ada barang di list kulakan</p>
+                    <p class="text-[10px] uppercase tracking-wider mt-1">Gunakan form di atas untuk menambah barang</p>
                 </div>
             </div>
         </div>
     </form>
 
     <!-- Modal Pencarian Barang -->
-    <div x-show="showBarangModal" x-cloak 
+    <div x-show="showBarangModal" 
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3"
-        @keydown.esc.window="closeBarangModal">
+        style="display: none;"
+        @keydown.esc.window="closeBarangModal()">
         <div class="bg-white rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
             <!-- Header -->
             <div class="border-b border-gray-100 px-6 py-4 bg-gray-50">
@@ -215,7 +260,7 @@
                         </div>
                         <h2 class="font-bold text-gray-800">Cari Barang</h2>
                     </div>
-                    <button @click="closeBarangModal" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors font-bold">
+                    <button type="button" @click="closeBarangModal()" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors font-bold">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -224,7 +269,7 @@
 
                 <!-- Search Input -->
                 <div class="relative">
-                    <input type="text" x-model="barangSearchKeyword" @input.debounce.700ms="searchBarang" @keydown.esc="closeBarangModal"
+                    <input type="text" x-model="barangSearchKeyword" @input.debounce.700ms="searchBarang()" @keydown.esc="closeBarangModal()"
                         class="w-full px-4 py-2.5 pl-11 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm"
                         placeholder="Cari nama barang, kode, atau barcode..." x-ref="searchInput">
                     <svg class="absolute left-4 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,7 +332,7 @@
                                 </div>
                                 <div class="text-right flex flex-col items-end">
                                     <div class="text-sm font-bold text-blue-600 mb-1" x-text="formatRupiah(barang.harga_jual_normal)"></div>
-                                    <button @click.stop="selectBarang(barang)"
+                                    <button type="button" @click.stop="selectBarang(barang)"
                                         class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-100">
                                         PILIH
                                     </button>
@@ -324,7 +369,7 @@
                     Ditemukan <span class="font-bold text-blue-600" x-text="barangList.length"></span> barang
                 </p>
                 <div class="flex gap-2 ml-auto">
-                    <button @click="closeBarangModal" class="px-5 py-2 text-xs font-bold text-gray-600 border border-gray-200 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                    <button type="button" @click="closeBarangModal()" class="px-5 py-2 text-xs font-bold text-gray-600 border border-gray-200 bg-white rounded-lg hover:bg-gray-50 transition-colors">
                         TUTUP (ESC)
                     </button>
                 </div>
@@ -333,19 +378,20 @@
     </div>
 
     <!-- Modal Tambah Barang Baru -->
-    <div x-show="showNewBarangModal" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] overflow-y-auto py-10">
+    <div x-show="showNewBarangModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] overflow-y-auto py-10"
+        style="display: none;">
         <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 my-auto">
             <div class="p-4 border-b">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-semibold text-gray-800">Tambah Barang Baru</h3>
-                    <button @click="closeNewBarangModal" class="text-gray-400 hover:text-gray-600">
+                    <button type="button" @click="closeNewBarangModal()" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
             </div>
-            <form @submit.prevent="saveNewBarang">
+            <form @submit.prevent="saveNewBarang()">
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -404,7 +450,7 @@
                     </div>
                 </div>
                 <div class="p-4 border-t bg-gray-50 flex justify-end gap-3 rounded-b-lg">
-                    <button type="button" @click="closeNewBarangModal"
+                    <button type="button" @click="closeNewBarangModal()"
                         class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                         Batal
                     </button>
@@ -491,19 +537,25 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.newItem.kode_barang}`);
                 const data = await response.json();
-                const barang = data.find(b => b.kode_barang.toLowerCase() === this.newItem.kode_barang.toLowerCase() || (b.barcode && b.barcode.toLowerCase() === this.newItem.kode_barang.toLowerCase()));
+                
+                // Cari barang yang kodenya persis sama dengan input
+                const barang = data.find(b => 
+                    b.kode_barang.toLowerCase() === this.newItem.kode_barang.toLowerCase() || 
+                    (b.barcode && b.barcode.toLowerCase() === this.newItem.kode_barang.toLowerCase())
+                );
+
                 if (barang) {
                     this.isValidKode = true;
-                    this.validationMessage = 'Barang ditemukan';
+                    this.validationMessage = 'Barang : ' + barang.nama_barang;
                     this.selectedBarang = barang;
                 } else {
                     this.isValidKode = false;
-                    this.validationMessage = 'Kode barang tidak ditemukan';
+                    this.validationMessage = 'Kode/Barcode tidak ditemukan';
                     this.selectedBarang = null;
                 }
             } catch (e) {
                 this.isValidKode = false;
-                this.validationMessage = 'Error validasi';
+                this.validationMessage = 'Gagal memvalidasi kode';
                 this.selectedBarang = null;
                 console.error(e);
             }
