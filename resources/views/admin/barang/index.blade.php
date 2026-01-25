@@ -251,8 +251,8 @@
                         <label class="block text-xs font-black text-slate-700 uppercase mb-3 text-center tracking-widest">JUMLAH STOK FISIK AKTUAL</label>
                         <div class="flex flex-col items-center gap-3">
                             <div class="relative">
-                                <input type="number" id="opnameStokGudang" min="0" 
-                                    class="w-40 px-4 py-2 border-2 border-slate-200 rounded-2xl focus:border-yellow-500 focus:ring-4 focus:ring-yellow-100 outline-none transition-all text-xs font-black text-center text-slate-800" 
+                                <input type="number" id="opnameStokGudang" min="0" disabled
+                                    class="w-40 px-4 py-2 border-2 border-slate-200 rounded-2xl focus:border-yellow-500 focus:ring-4 focus:ring-yellow-100 outline-none transition-all text-xs font-black text-center text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed" 
                                     placeholder="0">
                             </div>
                             <p class="text-[10px] text-slate-400 font-bold uppercase italic">Pastikan hitungan fisik sudah sesuai</p>
@@ -262,8 +262,8 @@
             </div>
 
             <div class="bg-slate-50 px-6 py-4 flex gap-3 sm:flex-row-reverse rounded-b-xl border-t border-slate-100">
-                <button type="button" onclick="simpanOpname()" 
-                    class="flex-1 sm:flex-none inline-flex justify-center items-center rounded-xl px-8 py-3 bg-yellow-600 text-xs font-black uppercase tracking-widest text-white hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-200 active:transform active:scale-95">
+                <button type="button" id="btnSimpanOpname" onclick="simpanOpname()" disabled
+                    class="flex-1 sm:flex-none inline-flex justify-center items-center rounded-xl px-8 py-3 bg-yellow-600 text-xs font-black uppercase tracking-widest text-white hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-200 active:transform active:scale-95 disabled:bg-slate-300 disabled:shadow-none disabled:cursor-not-allowed">
                     Simpan Hasil
                 </button>
                 <button type="button" onclick="closeOpnameModal()" 
@@ -363,6 +363,8 @@
         document.getElementById('opnameStokDatabase').value = '';
         document.getElementById('opnameStokDatabaseVal').innerText = '0';
         document.getElementById('opnameStokGudang').value = '';
+        document.getElementById('opnameStokGudang').disabled = true;
+        document.getElementById('btnSimpanOpname').disabled = true;
         document.getElementById('opnameBarangInfo').classList.add('hidden');
         document.getElementById('opnameSatuanLabel').innerText = 'PCS';
         currentSelectedBarang = null;
@@ -469,6 +471,11 @@
         document.getElementById('opnameSatuanLabel').innerText = (item.satuan || 'PCS').toUpperCase();
         document.getElementById('opnameHargaJual').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(item.harga_jual_normal);
         document.getElementById('opnameBarangInfo').classList.remove('hidden');
+        
+        // Enable input and button
+        document.getElementById('opnameStokGudang').disabled = false;
+        document.getElementById('btnSimpanOpname').disabled = false;
+        document.getElementById('opnameStokGudang').focus();
     }
 
     async function simpanOpname() {
