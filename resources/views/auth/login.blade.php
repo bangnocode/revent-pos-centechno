@@ -39,7 +39,7 @@
             </div>
 
             <!-- Form -->
-            <form action="{{ route('login') }}" method="POST" class="space-y-6">
+            <form id="loginForm" action="{{ route('login') }}" method="POST" class="space-y-6">
                 @csrf
                 
                 <!-- Email Field -->
@@ -136,10 +136,15 @@
 
                 <!-- Submit Button -->
                 <button
+                    id="loginButton"
                     type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center space-x-2"
                 >
-                    Login
+                    <span id="buttonText">Login</span>
+                    <svg id="loadingSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </button>
             </form>
         </div>
@@ -151,5 +156,23 @@
             </p>
         </div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Disable button
+            button.disabled = true;
+            
+            // Show spinner & change text
+            buttonText.innerText = 'Logging in...';
+            loadingSpinner.classList.remove('hidden');
+            
+            // Add slight opacity effect
+            button.classList.add('opacity-80');
+        });
+    </script>
 </body>
 </html>
