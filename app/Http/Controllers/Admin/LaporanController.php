@@ -13,8 +13,8 @@ class LaporanController extends Controller
     {
         $kode_barang = $request->input('kode_barang');
         $keyword = $request->input('keyword');
-        $start_date = $request->input('start_date');
-        $end_date = $request->input('end_date');
+        $start_date = $request->input('start_date', date('Y-m-d'));
+        $end_date = $request->input('end_date', date('Y-m-d'));
 
         $logs = null;
         $selectedBarang = null;

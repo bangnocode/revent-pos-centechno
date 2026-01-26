@@ -1,50 +1,54 @@
 @extends('admin.layout.app')
 
 @section('content')
-<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-800">Laporan Keluar Masuk Barang</h2>
-        <p class="text-sm text-gray-500">Pantau pergerakan stok barang anda secara detail</p>
+<div x-data="stokLaporanHandler()" @keydown.window.f3.prevent="openBarangModal()">
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Laporan Keluar Masuk Barang</h2>
+            <p class="text-sm text-gray-500">Pantau pergerakan stok barang anda secara detail</p>
+        </div>
     </div>
-</div>
 
-<!-- Pencarian Barang -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-    <form action="{{ route('admin.laporan.stok') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div class="md:col-span-2 space-y-1">
-            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cari Barang</label>
-            <div class="relative group">
-                <input type="text" id="barangSearchInput" name="keyword" value="{{ $keyword }}" placeholder="Ketik nama barang atau barcode..." 
-                    class="w-full px-3 py-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs font-medium">
-                <div class="absolute left-3 top-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+    <!-- Pencarian Barang -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+        <form action="{{ route('admin.laporan.stok') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="md:col-span-2 space-y-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cari Barang (F3)</label>
+                <div class="relative group flex gap-2">
+                    <div class="relative flex-1">
+                        <input type="text" id="barangSearchInput" name="keyword" x-model="keyword" placeholder="Ketik nama barang atau barcode..." 
+                            class="w-full px-3 py-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs font-medium">
+                        <div class="absolute left-3 top-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <button type="button" @click="openBarangModal()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                        CARI
+                    </button>
                 </div>
-                <div id="searchDropdown" class="absolute z-30 w-full mt-1 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden hidden divide-y divide-gray-50 max-h-60 overflow-y-auto">
-                </div>
+                <input type="hidden" name="kode_barang" x-model="kode_barang">
             </div>
-            <input type="hidden" name="kode_barang" id="kodeBarangInput" value="{{ $kode_barang }}">
-        </div>
 
-        <div class="space-y-1">
-            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mulai</label>
-            <input type="date" name="start_date" value="{{ $start_date }}" 
-                class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs">
-        </div>
-
-        <div class="space-y-1">
-            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sampai</label>
-            <div class="flex gap-2">
-                <input type="date" name="end_date" value="{{ $end_date }}" 
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mulai</label>
+                <input type="date" name="start_date" value="{{ $start_date }}" 
                     class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs">
-                <button type="submit" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900 transition-all flex items-center justify-center gap-2 text-xs shrink-0">
-                    CARI
-                </button>
             </div>
-        </div>
-    </form>
-</div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sampai</label>
+                <div class="flex gap-2">
+                    <input type="date" name="end_date" value="{{ $end_date }}" 
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xs">
+                    <button type="submit" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900 transition-all flex items-center justify-center gap-2 text-xs shrink-0">
+                        FILTER
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
 <!-- Info Barang Terpilih -->
 @if($selectedBarang)
@@ -165,65 +169,176 @@
     @endif
 </div>
 
-<script>
-    const searchInput = document.getElementById('barangSearchInput');
-    const searchDropdown = document.getElementById('searchDropdown');
-    const kodeBarangInput = document.getElementById('kodeBarangInput');
-    let searchTimeout = null;
+    <!-- Modal Pencarian Barang -->
+    <div x-show="showBarangModal" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3"
+        style="display: none;"
+        @keydown.esc.window="closeBarangModal()">
+        <div class="bg-white rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="border-b border-gray-100 px-6 py-4 bg-gray-50">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 bg-blue-100 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="font-bold text-gray-800">Cari Barang</h2>
+                    </div>
+                    <button type="button" @click="closeBarangModal()" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-    searchInput.addEventListener('input', function() {
-        const keyword = this.value;
-        clearTimeout(searchTimeout);
+                <!-- Search Input -->
+                <div class="relative group">
+                    <input type="text" 
+                        x-model="barangSearchKeyword" 
+                        @input.debounce.300ms="searchBarang()"
+                        x-ref="searchInput"
+                        class="w-full px-4 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        placeholder="Ketik Nama / Kode / Barcode Barang..."
+                        @keydown.arrow-down.prevent="navigasiSearch(1)"
+                        @keydown.arrow-up.prevent="navigasiSearch(-1)"
+                        @keydown.enter.prevent="tambahSelectedBarang()">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
 
-        if (keyword.length < 2) {
-            searchDropdown.classList.add('hidden');
-            return;
-        }
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto p-4 bg-gray-50">
+                <!-- Loading State -->
+                <div x-show="isSearchingBarang" class="flex flex-col items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-3"></div>
+                    <p class="text-gray-500 font-medium">Mencari barang...</p>
+                </div>
 
-        searchTimeout = setTimeout(async () => {
-            try {
-                const response = await fetch(`{{ route('admin.barang.search') }}?keyword=${keyword}`);
-                const data = await response.json();
-
-                if (data.length > 0) {
-                    searchDropdown.innerHTML = '';
-                    data.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors group flex justify-between items-center';
-                        div.innerHTML = `
-                            <div>
-                                <div class="font-bold text-gray-900 group-hover:text-blue-600">${item.nama_barang}</div>
-                                <div class="text-[10px] text-gray-400 font-mono uppercase">${item.kode_barang}</div>
+                <!-- Results -->
+                <div x-show="!isSearchingBarang && barangList.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-3"
+                    @keydown.window.arrow-up.prevent="navigasiSearch(-1)"
+                    @keydown.window.arrow-down.prevent="navigasiSearch(1)"
+                    @keydown.window.enter.prevent="tambahSelectedBarang()">
+                    <template x-for="(barang, index) in barangList" :key="barang.kode_barang">
+                        <div @click="selectBarang(barang)" @mouseenter="selectedSearchIndex = index"
+                            :class="selectedSearchIndex === index ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-100' : 'bg-white border-gray-100'"
+                            class="rounded-xl p-4 border hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                            :id="'search-item-' + index">
+                            
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-gray-800 group-hover:text-blue-600 transition-colors" x-text="barang.nama_barang"></h3>
+                                    <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
+                                        <span class="flex items-center gap-1 font-mono" x-text="barang.kode_barang"></span>
+                                        <span x-show="barang.barcode" class="flex items-center gap-1 font-mono">| <span x-text="barang.barcode"></span></span>
+                                    </div>
+                                    <div class="mt-3 flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border bg-green-50 text-green-600 border-green-100">
+                                            Stok: <span x-text="Math.floor(barang.stok_sekarang)"></span> <span x-text="barang.satuan"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <button type="button" @click.stop="selectBarang(barang)"
+                                        class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-100">
+                                        PILIH
+                                    </button>
+                                </div>
                             </div>
-                            <div class="text-[10px] font-black text-blue-500 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded">Stok: ${item.stok_sekarang}</div>
-                        `;
-                        div.onclick = () => {
-                            searchInput.value = item.nama_barang;
-                            kodeBarangInput.value = item.kode_barang;
-                            searchDropdown.classList.add('hidden');
-                            // Auto submit after selection
-                            searchInput.closest('form').submit();
-                        };
-                        searchDropdown.appendChild(div);
-                    });
-                    searchDropdown.classList.remove('hidden');
-                } else {
-                    searchDropdown.innerHTML = '<div class="px-4 py-8 text-center text-gray-400 italic text-xs font-bold uppercase tracking-widest">Barang tidak ditemukan</div>';
-                    searchDropdown.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error searching barang:', error);
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!isSearchingBarang && barangList.length === 0 && barangSearchKeyword.length > 0" 
+                    class="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-100">
+                    <p class="text-gray-600 font-bold italic">Barang tidak ditemukan</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t border-gray-100 px-6 py-4 bg-gray-50 flex justify-end items-center">
+                <button type="button" @click="closeBarangModal()" class="px-5 py-2 text-xs font-bold text-gray-600 border border-gray-200 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                    TUTUP (ESC)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('stokLaporanHandler', () => ({
+        keyword: '{{ $keyword }}',
+        kode_barang: '{{ $kode_barang }}',
+        showBarangModal: false,
+        barangSearchKeyword: '',
+        barangList: [],
+        isSearchingBarang: false,
+        selectedSearchIndex: -1,
+
+        openBarangModal() {
+            this.showBarangModal = true;
+            this.barangSearchKeyword = '';
+            this.barangList = [];
+            this.$nextTick(() => {
+                this.$refs.searchInput.focus();
+            });
+        },
+
+        closeBarangModal() {
+            this.showBarangModal = false;
+        },
+
+        async searchBarang() {
+            if (this.barangSearchKeyword.length < 2) {
+                this.barangList = [];
+                return;
             }
-        }, 300);
-    });
+            this.isSearchingBarang = true;
+            try {
+                const response = await fetch(`{{ route("admin.barang.search") }}?keyword=${this.barangSearchKeyword}`);
+                this.barangList = await response.json();
+                this.selectedSearchIndex = this.barangList.length > 0 ? 0 : -1;
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isSearchingBarang = false;
+            }
+        },
 
-    // Close dropdown on click outside
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
-            searchDropdown.classList.add('hidden');
+        navigasiSearch(direction) {
+            if (this.barangList.length === 0) return;
+            let newIndex = this.selectedSearchIndex + direction;
+            if (newIndex < 0) newIndex = this.barangList.length - 1;
+            if (newIndex >= this.barangList.length) newIndex = 0;
+            this.selectedSearchIndex = newIndex;
+            this.$nextTick(() => {
+                const el = document.getElementById('search-item-' + newIndex);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        },
+
+        tambahSelectedBarang() {
+            if (this.selectedSearchIndex >= 0 && this.selectedSearchIndex < this.barangList.length) {
+                this.selectBarang(this.barangList[this.selectedSearchIndex]);
+            }
+        },
+
+        selectBarang(barang) {
+            this.keyword = barang.nama_barang;
+            this.kode_barang = barang.kode_barang;
+            this.closeBarangModal();
+            // Auto submit
+            this.$nextTick(() => {
+                document.getElementById('barangSearchInput').closest('form').submit();
+            });
         }
-    });
-
-    // Prevent direct form submit if input is empty but allow Enter to work normally
+    }));
+});
 </script>
 @endsection

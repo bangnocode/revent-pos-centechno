@@ -44,7 +44,8 @@ class PosController extends Controller
      */
     public function index()
     {
-        return view('pos.index');
+        $suppliers = \App\Models\Supplier::all();
+        return view('pos.index', compact('suppliers'));
     }
 
     /**

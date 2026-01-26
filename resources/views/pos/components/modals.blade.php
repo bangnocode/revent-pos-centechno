@@ -107,9 +107,14 @@
             <!-- Nama Pembeli -->
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Nama Pembeli</label>
-                <input v-model="pembayaran.nama_pelanggan" type="text"
+                <select v-model="pembayaran.nama_pelanggan"
                     class="w-full px-2.5 py-1.5 border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
-                    placeholder="Pelanggan Umum" :disabled="isProcessing" />
+                    :disabled="isProcessing">
+                    <option value="Pelanggan Umum">Pelanggan Umum</option>
+                    @foreach($suppliers as $sup)
+                        <option value="{{ $sup->nama_supplier }}">{{ $sup->nama_supplier }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <!-- Metode Pembayaran -->
