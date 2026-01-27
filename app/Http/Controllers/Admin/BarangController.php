@@ -81,12 +81,12 @@ class BarangController extends Controller
             }
 
             // Gabungkan BRG dengan angka yang di-pad 6 digit
-            $data['kode_barang'] = 'BRG' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            $data['kode_barang'] = 'BR' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
 
             // Pastikan tidak duplikat (safety check)
             while (Barang::where('kode_barang', $data['kode_barang'])->exists()) {
                 $nextNumber++;
-                $data['kode_barang'] = 'BRG' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                $data['kode_barang'] = 'BR' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             }
         }
 
@@ -94,10 +94,10 @@ class BarangController extends Controller
         if (empty($data['barcode'])) {
             do {
                 // Generate a random 12 digit number (timestamp + random digits)
-                $barcode = date('ymd') . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+                $barcode = $data['kode_barang'];
             } while (Barang::where('barcode', $barcode)->exists());
 
-            $data['barcode'] = $barcode;
+            $data['barcode'] = $data['kode_barang'];
         }
 
         // Set satuan field untuk backward compatibility

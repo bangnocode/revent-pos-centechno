@@ -55,6 +55,13 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
     // Laporan Stok
     Route::get('/laporan/stok', [\App\Http\Controllers\Admin\LaporanController::class, 'stok'])->name('laporan.stok');
 
+    // Akuntansi
+    Route::get('rekening/search', [\App\Http\Controllers\Admin\RekeningController::class, 'search'])->name('rekening.search');
+    Route::resource('rekening', \App\Http\Controllers\Admin\RekeningController::class);
+    Route::resource('jurnal', \App\Http\Controllers\Admin\JurnalController::class);
+    Route::get('laporan/buku-besar', [\App\Http\Controllers\Admin\LaporanAkuntansiController::class, 'bukuBesar'])->name('akuntansi.buku-besar');
+    Route::get('laporan/neraca', [\App\Http\Controllers\Admin\LaporanAkuntansiController::class, 'neraca'])->name('akuntansi.neraca');
+
     // Supplier & Kulakan
     Route::resource('supplier', \App\Http\Controllers\Admin\SupplierController::class);
     Route::resource('pembelian', \App\Http\Controllers\Admin\PembelianController::class);

@@ -4,13 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REVENT - Centechno</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { 
-            font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
+        }
+        /* Custom Select2 Overrides for compact look */
+        .select2-container--default .select2-selection--single {
+            border-color: #d1d5db !important;
+            height: 34px !important;
+            padding: 2px 0 !important;
+            border-radius: 0.5rem !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 32px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px !important;
+            font-size: 0.75rem !important;
         }
         /* Table Sorting Styles */
         th.sortable {
@@ -55,6 +70,7 @@
                  x-data="{ 
                     openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.user*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
                     openTransaksi: {{ request()->routeIs('admin.pembelian*') ? 'true' : 'false' }},
+                    openAkuntansi: {{ request()->routeIs('admin.rekening*') || request()->routeIs('admin.jurnal*') || request()->routeIs('admin.akuntansi*') ? 'true' : 'false' }},
                     openLaporan: {{ request()->routeIs('admin.transaksi.*') || request()->routeIs('admin.laporan.*') ? 'true' : 'false' }}
                  }">
                 
@@ -146,6 +162,35 @@
                     </div>
                 </div>
 
+                <!-- Akuntansi -->
+                <div class="space-y-1">
+                    <button @click="openAkuntansi = !openAkuntansi" class="w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg transition-all text-sm text-slate-300 hover:bg-slate-800 hover:text-white group">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">Akuntansi</span>
+                        </div>
+                        <svg class="w-3 h-3 transition-transform" :class="openAkuntansi ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="openAkuntansi" x-transition class="pl-4 space-y-1">
+                        <a href="{{ route('admin.rekening.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.rekening*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Master Rekening</span>
+                        </a>
+                        <a href="{{ route('admin.jurnal.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.jurnal*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Jurnal Umum</span>
+                        </a>
+                        <a href="{{ route('admin.akuntansi.buku-besar') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.akuntansi.buku-besar') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Buku Besar</span>
+                        </a>
+                        <a href="{{ route('admin.akuntansi.neraca') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.akuntansi.neraca') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Neraca</span>
+                        </a>
+                    </div>
+                </div>
+
                 <div class="pt-6 mt-auto">
                     <a href="{{ url('/pos') }}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-green-600 hover:text-white hover:border-transparent transition-all text-sm">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,6 +230,7 @@
                  x-data="{ 
                     openMaster: {{ request()->routeIs('admin.barang*') || request()->routeIs('admin.supplier*') || request()->routeIs('admin.satuan*') ? 'true' : 'false' }},
                     openTransaksi: {{ request()->routeIs('admin.pembelian*') ? 'true' : 'false' }},
+                    openAkuntansi: {{ request()->routeIs('admin.rekening*') || request()->routeIs('admin.jurnal*') || request()->routeIs('admin.akuntansi*') ? 'true' : 'false' }},
                     openLaporan: {{ request()->routeIs('admin.transaksi.*') || request()->routeIs('admin.laporan.*') ? 'true' : 'false' }}
                  }">
                 <a href="{{ url('/admin/dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-sm {{ request()->is('admin/dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -239,6 +285,35 @@
                     <div x-show="openTransaksi" x-transition class="pl-4 space-y-1">
                         <a href="{{ route('admin.pembelian.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.pembelian*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
                             <span>• Kulakan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Akuntansi -->
+                <div class="space-y-1">
+                    <button @click="openAkuntansi = !openAkuntansi" class="w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg transition-all text-sm text-slate-300 hover:bg-slate-800 hover:text-white group">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">Akuntansi</span>
+                        </div>
+                        <svg class="w-3 h-3 transition-transform" :class="openAkuntansi ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="openAkuntansi" x-transition class="pl-4 space-y-1">
+                        <a href="{{ route('admin.rekening.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.rekening*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Master Rekening</span>
+                        </a>
+                        <a href="{{ route('admin.jurnal.index') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.jurnal*') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Jurnal Umum</span>
+                        </a>
+                        <a href="{{ route('admin.akuntansi.buku-besar') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.akuntansi.buku-besar') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Buku Besar</span>
+                        </a>
+                        <a href="{{ route('admin.akuntansi.neraca') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-xs {{ request()->routeIs('admin.akuntansi.neraca') ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white' }}">
+                            <span>• Neraca</span>
                         </a>
                     </div>
                 </div>
@@ -337,6 +412,23 @@
                             <div class="ml-2.5">
                                 <p class="text-xs text-green-700">
                                     {{ session('success') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-r shadow-sm">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-2.5">
+                                <p class="text-xs text-red-700">
+                                    {{ session('error') }}
                                 </p>
                             </div>
                         </div>
